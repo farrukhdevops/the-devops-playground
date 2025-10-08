@@ -1,19 +1,11 @@
 name: CI
 on:
   push:
-    branches: [dev, prod]
+    branches: [dev, main]
   pull_request:
-    branches: [dev, prod]
+    branches: [dev, main]
 jobs:
-  lint:
-    name: CI / lint
+  hello:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - run: echo "lint ok"
-  build:
-    name: CI / build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: echo "build ok"
+      - run: echo "hello"
