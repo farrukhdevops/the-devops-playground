@@ -7,3 +7,7 @@ __pycache__/
 .idea/
 *.log
 *.pid
+
+# keep env out of git
+.env*
+platform/compose/.env.local
