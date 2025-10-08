@@ -1,0 +1,38 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - /etc/prometheus/alert.rules.yml
+
+scrape_configs:
+  # Prometheus self
+  - job_name: prometheus
+    static_configs:
+      - targets: ['prometheus:9090']
+
+  # Node exporter (what the Node Exporter Full dashboard expects)
+  - job_name: node-exporter
+    static_configs:
+      - targets: ['host.docker.internal:9100']
+
+  # cAdvisor (for "Docker and system monitoring" dashboard)
+  - job_name: cadvisor
+    static_configs:
+      - targets: ['cadvisor:8080']
+
+  # RabbitMQ management plugin metrics
+  - job_name: rabbitmq
+    static_configs:
+      - targets: ['rabbitmq:15692']
+
+  # Loki metrics (optional but nice for Prometheus Stats)
+  - job_name: loki
+    static_configs:
+      - targets: ['loki:3100']
+
+  # Promtail metrics (optional)
+  - job_name: promtail
+    static_configs:
+      - targets: ['promtail:9080']
+
