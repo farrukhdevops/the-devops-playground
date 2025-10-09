@@ -1,64 +1,9 @@
-from fastapi import FastAPI, HTTPException, Response
-from pydantic import BaseModel
-import os, json, pika
-from urllib.parse import urlparse
+from fastapi import FastAPI
+from prometheus_fastapi_instrumentator import Instrumentator
 
-app = FastAPI(title="catalog-api")
-
-class ProductIn(BaseModel):
-    name: str
-    description: str | None = None
+app = FastAPI()
+Instrumentator().instrument(app).expose(app, endpoint="/metrics")
 
 @app.get("/healthz")
 def healthz():
-    return {"status": "ok"}
-
-def rmq_params():
-    url = os.getenv("RABBITMQ_URL", "").strip()
-    if url:
-        u = urlparse(url)
-        user = u.username or "guest"
-        pwd  = u.password or "guest"
-        host = u.hostname or "rabbitmq"
-        port = u.port or 5672
-        vhost = u.path[1:] if u.path and len(u.path) > 1 else "/"
-        return pika.ConnectionParameters(
-            host=host, port=port, virtual_host=vhost,
-            credentials=pika.PlainCredentials(user, pwd)
-        )
-    # discrete vars fallback
-    host = os.getenv("RABBITMQ_HOST", "rabbitmq")
-    port = int(os.getenv("RABBITMQ_PORT", "5672"))
-    user = os.getenv("RABBITMQ_USER", "guest")
-    pwd  = os.getenv("RABBITMQ_PASS", "guest")
-    vhost = os.getenv("RABBITMQ_VHOST", "/")
-    return pika.ConnectionParameters(
-        host=host, port=port, virtual_host=vhost,
-        credentials=pika.PlainCredentials(user, pwd)
-    )
-
-@app.post("/products")
-def create_product(p: ProductIn):
-    try:
-        conn = pika.BlockingConnection(rmq_params())
-        ch = conn.channel()
-        exch = os.getenv("CATALOG_EXCHANGE", "catalog")
-        rk   = os.getenv("CATALOG_ROUTING_KEY", "product.created")
-        ch.exchange_declare(exchange=exch, exchange_type="topic", durable=True)
-        body = json.dumps({"name": p.name, "description": p.description}).encode()
-        ch.basic_publish(exchange=exch, routing_key=rk, body=body)
-        conn.close()
-        return {"queued": True, "name": p.name, "routing_key": rk}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"RMQ publish failed: {e}")
-
-# --- Day6 Observability: minimal /metrics endpoint (no middleware, no startup hooks) ---
-try:
-    from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
-    @app.get("/metrics")
-    def metrics():
-        return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
-except Exception:
-    # keep API alive even if prometheus_client isn't present
-    pass
-# --- /Day6 ---
+    return {"status": "ok", "service": "catalog-api"}

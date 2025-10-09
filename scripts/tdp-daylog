@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ts=$(date +'%Y-%m-%d_%H-%M-%S')
+out=".daylog/$ts.txt"
+{
+  echo "=== DATE $(date -Is) ==="
+  echo
+  echo "=== git ==="
+  git rev-parse --abbrev-ref HEAD || true
+  git status --porcelain=v1 || true
+  echo
+  echo "=== docker ps ==="
+  docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}'
+  echo
+  echo "=== compose rendered ==="
+  docker compose -p tdp -f platform/compose/compose.yml \
+    -f platform/compose/metrics.addon.yml \
+    --env-file platform/compose/.env.local config 2>/dev/null || true
+  echo
+  echo "=== prometheus targets ==="
+  if curl -fsS http://localhost:9090/-/ready >/dev/null 2>&1; then
+    curl -fsS 'http://localhost:9090/api/v1/targets?state=any' \
+    | jq -r '.data.activeTargets[] | [.labels.job,.labels.instance,.health,.lastError] | @tsv' | sort
+  else
+    echo "prometheus not ready"
+  fi
+} > "$out"
+echo "Wrote $out"
