@@ -15,7 +15,6 @@ services:
     labels:
       logging: promtail
       loki_job: promtail
-
   postgres:
     image: postgres:16
     container_name: pg
@@ -27,7 +26,6 @@ services:
       - 5432:5432
     volumes:
       - pgdata:/var/lib/postgresql/data
-
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
@@ -38,7 +36,11 @@ services:
       - 15672:15672
       - 15692:15692
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      test:
+        - CMD
+        - rabbitmq-diagnostics
+        - -q
+        - ping
       interval: 5s
       timeout: 3s
       retries: 15
@@ -46,7 +48,6 @@ services:
       logging: promtail
       loki_job: rabbitmq
     command: bash -lc "rabbitmq-plugins enable --offline rabbitmq_prometheus && docker-entrypoint.sh rabbitmq-server"
-
   catalog-api:
     build:
       context: ../../apps/catalog-api
@@ -69,7 +70,6 @@ services:
       - 0.0.0.0
       - --port
       - "8000"
-
   inventory-worker:
     build:
       context: ../../apps/inventory-worker
@@ -84,7 +84,6 @@ services:
     labels:
       logging: promtail
       loki_job: inventory-worker
-
   loki:
     image: grafana/loki:2.9.8
     command:
@@ -93,20 +92,18 @@ services:
       - 3100:3100
     volumes:
       - loki-data:/loki
-
   prometheus:
     image: prom/prometheus:v2.54.1
     container_name: prometheus
     ports:
       - 9090:9090
     volumes:
-      - ../observability/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml
     command:
       - --config.file=/etc/prometheus/prometheus.yml
     depends_on:
       - catalog-api
       - loki
-
   grafana:
     image: grafana/grafana:11.2.0
     container_name: grafana
@@ -121,7 +118,11 @@ services:
     depends_on:
       - prometheus
       - loki
-
+volumes:
+  pgdata: null
+  loki-data: {}
+  prometheus-data: {}
+  grafana-data: {}
   frontend:
     build:
       context: ../../apps/frontend
@@ -130,24 +131,15 @@ services:
     container_name: tdp-frontend
     ports:
       - "8080:80"
-    labels:
-      logging: "promtail"
-      loki_job: "frontend"
     restart: unless-stopped
-
   portainer:
     image: portainer/portainer-ce:latest
     container_name: portainer
     ports:
-      - "9443:9443"
+      - "9443:9443" # HTTPS UI
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
     restart: always
-
 volumes:
-  pgdata: {}
-  loki-data: {}
-  prometheus-data: {}
-  grafana-data: {}
   portainer_data: {}

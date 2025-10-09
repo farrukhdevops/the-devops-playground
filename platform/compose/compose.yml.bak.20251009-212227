@@ -100,7 +100,7 @@ services:
     ports:
       - 9090:9090
     volumes:
-      - ../observability/prometheus.yml:/etc/prometheus/prometheus.yml
+      - .../observability/prometheus.yml:/etc/prometheus/prometheus.yml
     command:
       - --config.file=/etc/prometheus/prometheus.yml
     depends_on:
@@ -130,16 +130,13 @@ services:
     container_name: tdp-frontend
     ports:
       - "8080:80"
-    labels:
-      logging: "promtail"
-      loki_job: "frontend"
     restart: unless-stopped
 
   portainer:
     image: portainer/portainer-ce:latest
     container_name: portainer
     ports:
-      - "9443:9443"
+      - "9443:9443" # HTTPS UI
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data

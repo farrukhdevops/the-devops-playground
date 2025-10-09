@@ -1,20 +1,13 @@
 services:
   promtail:
-    image: grafana/promtail:2.9.8
-    command: [-config.file=/etc/promtail/promtail-config.yml, -config.expand-env=true]
+    image: grafana/promtail:latest
+    command: ["--config.file=/etc/promtail/config.yml"]
     volumes:
-      - ../observability/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./promtail-config.yml:/etc/promtail/config.yml:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/log:/var/log:ro
     depends_on:
-      loki:
-        condition: service_started
-    ports:
-      - 9080:9080
-    labels:
-      logging: promtail
-      loki_job: promtail
+      - loki
 
   postgres:
     image: postgres:16
@@ -27,7 +20,6 @@ services:
       - 5432:5432
     volumes:
       - pgdata:/var/lib/postgresql/data
-
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
@@ -38,7 +30,11 @@ services:
       - 15672:15672
       - 15692:15692
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      test:
+        - CMD
+        - rabbitmq-diagnostics
+        - -q
+        - ping
       interval: 5s
       timeout: 3s
       retries: 15
@@ -46,7 +42,6 @@ services:
       logging: promtail
       loki_job: rabbitmq
     command: bash -lc "rabbitmq-plugins enable --offline rabbitmq_prometheus && docker-entrypoint.sh rabbitmq-server"
-
   catalog-api:
     build:
       context: ../../apps/catalog-api
@@ -69,7 +64,6 @@ services:
       - 0.0.0.0
       - --port
       - "8000"
-
   inventory-worker:
     build:
       context: ../../apps/inventory-worker
@@ -84,7 +78,6 @@ services:
     labels:
       logging: promtail
       loki_job: inventory-worker
-
   loki:
     image: grafana/loki:2.9.8
     command:
@@ -93,20 +86,33 @@ services:
       - 3100:3100
     volumes:
       - loki-data:/loki
-
+  promtail:
+    image: grafana/promtail:2.9.8
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ../observability/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
+    command:
+      - -config.file=/etc/promtail/promtail-config.yml
+      - -config.expand-env=true
+    depends_on:
+      loki:
+        condition: service_started
+    labels:
+      logging: promtail
+      loki_job: promtail
   prometheus:
     image: prom/prometheus:v2.54.1
     container_name: prometheus
     ports:
       - 9090:9090
     volumes:
-      - ../observability/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml
     command:
       - --config.file=/etc/prometheus/prometheus.yml
     depends_on:
       - catalog-api
       - loki
-
   grafana:
     image: grafana/grafana:11.2.0
     container_name: grafana
@@ -121,6 +127,12 @@ services:
     depends_on:
       - prometheus
       - loki
+volumes:
+  pgdata: null
+  loki-data: {}
+  prometheus-data: {}
+  grafana-data: {}
+
 
   frontend:
     build:
@@ -130,24 +142,17 @@ services:
     container_name: tdp-frontend
     ports:
       - "8080:80"
-    labels:
-      logging: "promtail"
-      loki_job: "frontend"
     restart: unless-stopped
 
   portainer:
     image: portainer/portainer-ce:latest
     container_name: portainer
     ports:
-      - "9443:9443"
+      - "9443:9443"        # HTTPS UI
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
     restart: always
 
 volumes:
-  pgdata: {}
-  loki-data: {}
-  prometheus-data: {}
-  grafana-data: {}
   portainer_data: {}
