@@ -1,0 +1,6 @@
+RABBITMQ_DEFAULT_USER=guest
+RABBITMQ_DEFAULT_PASS=guest
+RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+ORDERS_API_PORT=8001
+PAYMENTS_API_PORT=8002
+DATABASE_URL=postgresql://postgres:postgres@pg:5432/postgres

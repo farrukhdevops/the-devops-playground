@@ -11,3 +11,4 @@ __pycache__/
 # keep env out of git
 .env*
 platform/compose/.env.local
+.daylog/

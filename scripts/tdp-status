@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+echo "== docker ps =="
+docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+echo
+echo "== prometheus targets =="
+if curl -fsS http://localhost:9090/-/ready >/dev/null 2>&1; then
+  curl -fsS 'http://localhost:9090/api/v1/targets?state=any' \
+  | jq -r '.data.activeTargets[] | [.labels.job,.labels.instance,.health] | @tsv' \
+  | sort
+else
+  echo "prometheus not ready"
+fi

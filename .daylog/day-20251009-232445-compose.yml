@@ -1,0 +1,373 @@
+name: tdp
+services:
+  ai-worker:
+    build:
+      context: /home/farrukh/the-devops-playground/apps/ai-worker
+      dockerfile: Dockerfile
+    container_name: ai-worker
+    depends_on:
+      postgres:
+        condition: service_started
+        required: true
+      rabbitmq:
+        condition: service_started
+        required: true
+    environment:
+      DATABASE_URL: ""
+      ORDERS_API_PORT: "8001"
+      PAYMENTS_API_PORT: "8002"
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_URL: ""
+    labels:
+      logging: promtail
+      loki_job: ai-worker
+    networks:
+      default: null
+  catalog-api:
+    build:
+      context: /home/farrukh/the-devops-playground/apps/catalog-api
+      dockerfile: Dockerfile
+    command:
+      - uvicorn
+      - main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+    container_name: catalog-api
+    depends_on:
+      postgres:
+        condition: service_started
+        required: true
+      rabbitmq:
+        condition: service_started
+        required: true
+    environment:
+      APP_ENV: local
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/postgres
+      ORDERS_API_PORT: "8001"
+      PAYMENTS_API_PORT: "8002"
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+    labels:
+      logging: promtail
+      loki_job: catalog-api
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 8000
+        published: "8000"
+        protocol: tcp
+  frontend:
+    build:
+      context: /home/farrukh/the-devops-playground/apps/frontend
+      dockerfile: Dockerfile
+    container_name: tdp-frontend
+    image: tdp-frontend:latest
+    labels:
+      logging: promtail
+      loki_job: frontend
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 80
+        published: "8080"
+        protocol: tcp
+    restart: unless-stopped
+  grafana:
+    container_name: grafana
+    depends_on:
+      loki:
+        condition: service_started
+        required: true
+      prometheus:
+        condition: service_started
+        required: true
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_ADMIN_USER: admin
+    image: grafana/grafana:11.2.0
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 3000
+        published: "3000"
+        protocol: tcp
+    volumes:
+      - type: volume
+        source: grafana-data
+        target: /var/lib/grafana
+        volume: {}
+      - type: bind
+        source: /home/farrukh/the-devops-playground/platform/compose/observability/grafana-provisioning/datasources
+        target: /etc/grafana/provisioning/datasources
+        read_only: true
+        bind:
+          create_host_path: true
+  inventory-worker:
+    build:
+      context: /home/farrukh/the-devops-playground/apps/inventory-worker
+      dockerfile: Dockerfile
+    command:
+      - python
+      - -u
+      - worker.py
+    container_name: inventory-worker
+    depends_on:
+      rabbitmq:
+        condition: service_started
+        required: true
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/postgres
+      ORDERS_API_PORT: "8001"
+      PAYMENTS_API_PORT: "8002"
+      PYTHONUNBUFFERED: "1"
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+    labels:
+      logging: promtail
+      loki_job: inventory-worker
+    networks:
+      default: null
+  loki:
+    command:
+      - -config.file=/etc/loki/local-config.yaml
+    image: grafana/loki:2.9.8
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 3100
+        published: "3100"
+        protocol: tcp
+    volumes:
+      - type: volume
+        source: loki-data
+        target: /loki
+        volume: {}
+  orders-api:
+    build:
+      context: /home/farrukh/the-devops-playground/apps/orders-api
+      dockerfile: Dockerfile
+    container_name: orders-api
+    depends_on:
+      postgres:
+        condition: service_started
+        required: true
+      rabbitmq:
+        condition: service_started
+        required: true
+    environment:
+      DATABASE_URL: ""
+      ORDERS_API_PORT: "8001"
+      PAYMENTS_API_PORT: "8002"
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_URL: ""
+    labels:
+      logging: promtail
+      loki_job: orders-api
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 8000
+        published: "8001"
+        protocol: tcp
+  payments-api:
+    build:
+      context: /home/farrukh/the-devops-playground/apps/payments-api
+      dockerfile: Dockerfile
+    container_name: payments-api
+    depends_on:
+      postgres:
+        condition: service_started
+        required: true
+      rabbitmq:
+        condition: service_started
+        required: true
+    environment:
+      DATABASE_URL: ""
+      ORDERS_API_PORT: "8001"
+      PAYMENTS_API_PORT: "8002"
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_URL: ""
+    labels:
+      logging: promtail
+      loki_job: payments-api
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 8000
+        published: "8002"
+        protocol: tcp
+  portainer:
+    container_name: portainer
+    image: portainer/portainer-ce:latest
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 9443
+        published: "9443"
+        protocol: tcp
+    restart: always
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+        bind:
+          create_host_path: true
+      - type: volume
+        source: portainer_data
+        target: /data
+        volume: {}
+  postgres:
+    container_name: pg
+    environment:
+      POSTGRES_DB: catalog
+      POSTGRES_PASSWORD: catalog_pass
+      POSTGRES_USER: catalog_user
+    image: postgres:16
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 5432
+        published: "5432"
+        protocol: tcp
+    volumes:
+      - type: volume
+        source: pgdata
+        target: /var/lib/postgresql/data
+        volume: {}
+  prometheus:
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    container_name: prometheus
+    depends_on:
+      catalog-api:
+        condition: service_started
+        required: true
+      loki:
+        condition: service_started
+        required: true
+    image: prom/prometheus:v2.54.1
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 9090
+        published: "9090"
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /home/farrukh/the-devops-playground/platform/observability/prometheus.yml
+        target: /etc/prometheus/prometheus.yml
+        bind:
+          create_host_path: true
+  promtail:
+    command:
+      - -config.file=/etc/promtail/promtail-config.yml
+      - -config.expand-env=true
+    depends_on:
+      loki:
+        condition: service_started
+        required: true
+    image: grafana/promtail:2.9.8
+    labels:
+      logging: promtail
+      loki_job: promtail
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 9080
+        published: "9080"
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /home/farrukh/the-devops-playground/platform/observability/promtail-config.yml
+        target: /etc/promtail/promtail-config.yml
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /var/lib/docker/containers
+        target: /var/lib/docker/containers
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /var/log
+        target: /var/log
+        read_only: true
+        bind:
+          create_host_path: true
+  rabbitmq:
+    command:
+      - bash
+      - -lc
+      - rabbitmq-plugins enable --offline rabbitmq_prometheus && docker-entrypoint.sh rabbitmq-server
+    container_name: rabbitmq
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/postgres
+      ORDERS_API_PORT: "8001"
+      PAYMENTS_API_PORT: "8002"
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+    healthcheck:
+      test:
+        - CMD
+        - rabbitmq-diagnostics
+        - -q
+        - ping
+      timeout: 3s
+      interval: 5s
+      retries: 15
+    image: rabbitmq:3-management
+    labels:
+      logging: promtail
+      loki_job: rabbitmq
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 5672
+        published: "5672"
+        protocol: tcp
+      - mode: ingress
+        target: 15672
+        published: "15672"
+        protocol: tcp
+      - mode: ingress
+        target: 15692
+        published: "15692"
+        protocol: tcp
+networks:
+  default:
+    name: tdp_default
+volumes:
+  grafana-data:
+    name: tdp_grafana-data
+  loki-data:
+    name: tdp_loki-data
+  pgdata:
+    name: tdp_pgdata
+  portainer_data:
+    name: tdp_portainer_data
