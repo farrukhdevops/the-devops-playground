@@ -1,0 +1,2 @@
+#!/usr/bin/env zsh
+docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' | sort

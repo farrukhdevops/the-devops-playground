@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+set -e
+docker compose -p tdp \
+  -f platform/compose/compose.yml \
+  -f platform/compose/observability.addon.yml \
+  -f platform/compose/metrics.addon.yml \
+  ${TDP_RULES:+-f platform/compose/prometheus.rules.addon.yml} \
+  --env-file platform/compose/.env.local \
+  down --remove-orphans
