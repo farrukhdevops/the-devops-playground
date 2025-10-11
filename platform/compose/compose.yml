@@ -134,11 +134,16 @@ services:
     image: portainer/portainer-ce:latest
     container_name: portainer
     ports:
-      - "9443:9443"
+      - 127.0.0.1:9443:9443
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
     restart: always
+    command:
+      - --admin-password-file
+      - /run/secrets/portainer_admin
+    secrets:
+      - portainer_admin
   orders-api:
     build: ../../apps/orders-api
     container_name: orders-api
@@ -192,3 +197,6 @@ volumes:
   grafana-data: {}
   portainer_data: {}
   promtail-positions: {}
+secrets:
+  portainer_admin:
+    file: ./portainer_admin.txt

@@ -1,0 +1,5 @@
+services:
+  portainer:
+    command: ["--admin-password","b/znb78AmHv4pYe0KV18ex4XNlzXF85m"]
+    # disable the secret for this one boot (comment out)
+    secrets: []

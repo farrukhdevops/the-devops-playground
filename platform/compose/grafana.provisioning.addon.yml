@@ -1,0 +1,5 @@
+services:
+  grafana:
+    volumes:
+      - ./platform/compose/observability/grafana-provisioning:/etc/grafana/provisioning:ro
+      - ./platform/compose/grafana-provisioning/dashboards:/var/lib/grafana/dashboards:ro

@@ -218,10 +218,3 @@ scrape_configs:
     static_configs:
       - targets:
           - postgres-exporter:9187
-  - job_name: storefront
-    metrics_path: /metrics
-    scrape_interval: 15s
-    static_configs:
-      - targets:
-          - storefront:3000
-          - 172.18.0.1:8080
