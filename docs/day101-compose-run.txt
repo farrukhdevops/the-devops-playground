@@ -1,0 +1,7 @@
+docker compose -p tdp \
+  -f platform/compose/compose.yml \
+  -f platform/compose/metrics.addon.yml \
+  -f platform/compose/observability.addon.yml \
+  -f platform/compose/persistence.addon.yml \
+  -f platform/compose/day101.override.yml \
+  up -d
