@@ -1,0 +1,6 @@
+services:
+  grafana:
+    environment:
+      - GF_PATHS_PROVISIONING=/provisioning
+    volumes:
+      - ./platform/compose/observability/grafana-provisioning:/provisioning:ro

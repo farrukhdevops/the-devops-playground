@@ -1,0 +1,26 @@
+groups:
+  - name: storefront_recording
+    interval: 15s
+    rules:
+      - record: storefront:requests_per_second
+        expr: sum by (route, status) (rate(http_requests_total{job="storefront"}[2m]))
+      - record: storefront:error_rate
+        expr: sum by (route) (rate(http_requests_total{job="storefront",status=~"5.."}[2m]))
+      - record: storefront:latency_ms:p50
+        expr: 1000 * histogram_quantile(0.50, sum by (le) (rate(http_request_duration_seconds_bucket{job="storefront"}[2m])))
+      - record: storefront:latency_ms:p90
+        expr: 1000 * histogram_quantile(0.90, sum by (le) (rate(http_request_duration_seconds_bucket{job="storefront"}[2m])))
+      - record: storefront:latency_ms:p99
+        expr: 1000 * histogram_quantile(0.99, sum by (le) (rate(http_request_duration_seconds_bucket{job="storefront"}[2m])))
+  - name: storefront_alerts
+    interval: 30s
+    rules:
+      - alert: StorefrontHighErrorRate
+        expr: sum(rate(http_requests_total{job="storefront",status=~"5.."}[5m])) 
+              / sum(rate(http_requests_total{job="storefront"}[5m])) > 0.05
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Storefront high error rate (>5%)"
+          description: "Error ratio exceeded 5% for >2m."

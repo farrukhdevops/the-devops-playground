@@ -1,0 +1,5 @@
+services:
+  prometheus:
+    volumes:
+      - ./observability/rules/storefront.rules.yml:/etc/prometheus/storefront.rules.yml:ro
+      - ./observability/rules/empty.rules.yml:/etc/prometheus/alert.rules.yml:ro

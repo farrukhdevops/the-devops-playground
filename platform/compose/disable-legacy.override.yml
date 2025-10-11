@@ -1,0 +1,5 @@
+services:
+  postgres:
+    deploy:
+      replicas: 0
+    restart: "no"
