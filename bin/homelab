@@ -1,0 +1,23 @@
+#!/usr/bin/env zsh
+ROOT="$HOME/the-devops-playground"
+cd "$ROOT" || exit 1
+
+CMD=(docker compose -p tdp
+  --env-file platform/compose/.env.local
+  -f platform/compose/compose.yml
+  -f platform/compose/metrics.addon.yml
+  -f platform/compose/observability.addon.yml
+  -f platform/compose/persistence.addon.yml
+  -f platform/compose/day101.override.yml
+  -f platform/compose/day8-1.override.yml
+  -f platform/compose/storefront.addon.yml)
+
+case "${1:-}" in
+  up)       "${CMD[@]}" up -d --remove-orphans ;;
+  down)     "${CMD[@]}" down ;;
+  ps)       docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' ;;
+  logs)     shift || true; docker logs -f "$@" ;;
+  config)   "${CMD[@]}" config ;;
+  restart)  "${CMD[@]}" restart ;;
+  *) echo "Usage: homelab {up|down|ps|logs [svc]|config|restart}"; exit 1 ;;
+esac

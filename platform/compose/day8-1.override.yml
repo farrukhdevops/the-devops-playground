@@ -1,21 +1,5 @@
 services:
   storefront:
-    build:
-      context: ../../apps/storefront
-    image: tdp/storefront:day8-1
     container_name: tdp-storefront
-    environment:
-      - CATALOG_API_URL=http://catalog-api:8000
-      - ORDERS_API_URL=http://orders-api:8000
-      - PAYMENTS_API_URL=http://payments-api:8000
-      - BFF_ENABLE_MOCKS=false
-      - PORT=3000
     ports:
       - "8080:3000"
-    depends_on:
-      - catalog-api
-      - orders-api
-    labels:
-      - "logging=promtail"
-      - "loki_job=storefront"
-    restart: unless-stopped

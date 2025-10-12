@@ -51,8 +51,13 @@ services:
 
   pg:
     image: postgres:16
+    container_name: pg           # <-- force literal name, prevents tdp-pg-1
     ports:
       - "5432:5432"
+    environment:
+      POSTGRES_DB: catalog
+      POSTGRES_USER: catalog_user
+      POSTGRES_PASSWORD: catalog_pass
     volumes:
       - pgdata:/var/lib/postgresql/data
 

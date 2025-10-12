@@ -30,4 +30,4 @@ services:
     environment:
       - DATA_SOURCE_NAME=postgresql://catalog_user:catalog_pass@pg:5432/catalog?sslmode=disable
     depends_on:
-      - postgres
+      - pg
