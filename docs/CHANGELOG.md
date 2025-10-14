@@ -7,3 +7,4 @@
 - Promtail file mount corrected; Prometheus & Loki stable.
 - Normalized ports and volumes; removed duplicates.
 - New README, context, runbook, and today-salvage narrative.
+
