@@ -1,0 +1,2 @@
+platform/compose/.env
+platform/compose/*.secret*
