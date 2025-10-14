@@ -48,3 +48,6 @@ docker compose -p tdp -f platform/compose/compose.yml -f platform/compose/local.
 
 ## Proof (screenshots to add)
 Place in docs/screenshots/: Prometheus Targets, Grafana “Observability”, Portainer list.
+
+
+_Last verified: 2025-10-14 20:15 UTC_
