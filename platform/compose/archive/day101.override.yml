@@ -1,0 +1,4 @@
+services:
+  prometheus:
+    volumes:
+      - "/home/farrukh/the-devops-playground/platform/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro"

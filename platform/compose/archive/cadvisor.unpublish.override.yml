@@ -1,0 +1,3 @@
+services:
+  cadvisor:
+    ports: []   # remove any host port binds

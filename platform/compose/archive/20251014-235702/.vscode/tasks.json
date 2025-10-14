@@ -1,0 +1,85 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "health: stack summary",
+      "type": "shell",
+      "command": "docker ps --format 'table {{.Names}}\\t{{.Status}}\\t{{.Ports}}'"
+    },
+    {
+      "label": "health: prometheus targets",
+      "type": "shell",
+      "command": "curl -s 'http://localhost:9090/api/v1/targets?state=active' | jq -r '.data.activeTargets[] | [.labels.job,.labels.instance,.health] | @tsv' | column -t"
+    },
+    {
+      "label": "open: Prometheus UI",
+      "type": "shell",
+      "command": "code --command simpleBrowser.show 'http://localhost:9090'"
+    },
+    {
+      "label": "open: Grafana UI",
+      "type": "shell",
+      "command": "code --command simpleBrowser.show 'http://localhost:3000'"
+    },
+    {
+      "label": "open: RabbitMQ UI",
+      "type": "shell",
+      "command": "code --command simpleBrowser.show 'http://localhost:15672'"
+    },
+    {
+      "label": "open: Storefront (8080)",
+      "type": "shell",
+      "command": "code --command simpleBrowser.show 'http://localhost:8080'"
+    },
+    {
+      "label": "tail: catalog-api (docker)",
+      "type": "shell",
+      "command": "docker logs -f catalog-api"
+    },
+    {
+      "label": "tail: orders-api (docker)",
+      "type": "shell",
+      "command": "docker logs -f orders-api"
+    },
+    {
+      "label": "tail: payments-api (docker)",
+      "type": "shell",
+      "command": "docker logs -f payments-api"
+    },
+    {
+      "label": "tail: storefront (docker)",
+      "type": "shell",
+      "command": "docker logs -f tdp-storefront-1"
+    },
+    {
+      "label": "tail: rabbitmq (docker)",
+      "type": "shell",
+      "command": "docker logs -f rabbitmq"
+    },
+    {
+      "label": "attach: catalog-api",
+      "type": "shell",
+      "command": "docker exec -it catalog-api sh"
+    },
+    {
+      "label": "attach: orders-api",
+      "type": "shell",
+      "command": "docker exec -it orders-api sh"
+    },
+    {
+      "label": "attach: payments-api",
+      "type": "shell",
+      "command": "docker exec -it payments-api sh"
+    },
+    {
+      "label": "attach: storefront",
+      "type": "shell",
+      "command": "docker exec -it tdp-storefront-1 sh"
+    },
+    {
+      "label": "attach: rabbitmq",
+      "type": "shell",
+      "command": "docker exec -it rabbitmq bash 2>/dev/null || docker exec -it rabbitmq sh"
+    }
+  ]
+}

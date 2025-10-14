@@ -1,0 +1,1 @@
+build_one:5: no such file or directory: docker compose -p tdp -f platform/compose/compose.yml -f platform/compose/local.override.yml

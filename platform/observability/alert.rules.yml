@@ -1,0 +1,11 @@
+groups:
+  - name: playground
+    rules:
+      - alert: PlaygroundAlive
+        expr: up == 1
+        for: 0m
+        labels:
+          severity: info
+        annotations:
+          summary: "Playground looks alive"
+          description: "At least one target is up."

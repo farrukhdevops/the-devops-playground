@@ -1,0 +1,346 @@
+### Repo: /home/farrukh/the-devops-playground
+### Time: 2025-10-13T02:54:33+05:00
+
+## A) Compose files that mention grafana/loki/prometheus and provisioning paths
+  platform/compose/day101.override.yml:1:services:
+  platform/compose/day101.override.yml:2:  prometheus:
+  platform/compose/grafana.provisioning.CLEAN.yml:1:services:
+  platform/compose/grafana.provisioning.CLEAN.yml:2:  grafana:
+  platform/compose/grafana.provisioning.CLEAN.yml:4:      # bind our clean tree at /etc/grafana/provisioning
+  platform/compose/grafana.provisioning.CLEAN.yml:5:      - ./platform/compose/grafana/provisioning:/etc/grafana/provisioning:ro
+  platform/compose/grafana.provisioning.addon.yml.disabled:1:services:
+  platform/compose/grafana.provisioning.addon.yml.disabled:2:  grafana:
+  platform/compose/grafana.provisioning.addon.yml.disabled:4:      - ./platform/compose/observability/grafana-provisioning:/etc/grafana/provisioning:ro
+  platform/compose/persistence.addon.yml:1:services:
+  platform/compose/persistence.addon.yml:2:  grafana:
+  platform/compose/persistence.addon.yml:3:    image: grafana/grafana:latest
+  platform/compose/persistence.addon.yml:11:      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+  platform/compose/persistence.addon.yml:13:  prometheus:
+  platform/compose/persistence.addon.yml:14:    image: prom/prometheus:v2.54.1
+  platform/compose/persistence.addon.yml:26:  loki:
+  platform/compose/persistence.addon.yml:27:    image: grafana/loki:2.9.8
+  platform/compose/persistence.addon.yml:30:# # # #     command: ["-config.file=/etc/loki/loki-config.yml"]
+  platform/compose/persistence.addon.yml:32:#       - ./observability/loki-config.yml:/etc/loki/loki-config.yml:ro
+  platform/compose/persistence.addon.yml:53:    container_name: pg           # <-- force literal name, prevents tdp-pg-1
+  platform/compose/hardening.addon.yml:1:services:
+  platform/compose/hardening.addon.yml:10:  prometheus:
+  platform/compose/hardening.addon.yml:18:  grafana:
+  platform/compose/prometheus.yml:10:      - targets: ['prometheus:9090']
+  platform/compose/prometheus.yml:26:      - targets: ['loki:3100']
+  platform/compose/loki.normalize.yml.disabled:1:services:
+  platform/compose/loki.normalize.yml.disabled:2:  loki:
+  platform/compose/loki.normalize.yml.disabled:3:    container_name: loki
+  platform/compose/compose.yml.bak.1760023095:1:services:
+  platform/compose/compose.yml.bak.1760023095:14:    container_name: pg
+  platform/compose/compose.yml.bak.1760023095:25:    container_name: rabbitmq
+  platform/compose/compose.yml.bak.1760023095:48:    container_name: catalog-api
+  platform/compose/compose.yml.bak.1760023095:70:    container_name: inventory-worker
+  platform/compose/compose.yml.bak.1760023095:81:  loki:
+  platform/compose/compose.yml.bak.1760023095:82:    image: grafana/loki:2.9.8
+  platform/compose/compose.yml.bak.1760023095:84:      - -config.file=/etc/loki/local-config.yaml
+  platform/compose/compose.yml.bak.1760023095:99:      loki:
+  platform/compose/compose.yml.bak.1760023095:104:  prometheus:
+  platform/compose/compose.yml.bak.1760023095:105:    image: prom/prometheus:v2.54.1
+  platform/compose/compose.yml.bak.1760023095:106:    container_name: prometheus
+  platform/compose/compose.yml.bak.1760023095:116:  grafana:
+  platform/compose/compose.yml.bak.1760023095:117:    image: grafana/grafana:11.2.0
+  platform/compose/compose.yml.bak.1760023095:118:    container_name: grafana
+  platform/compose/compose.yml.bak.1760023095:126:      - ./observability/grafana-provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+  platform/compose/compose.yml.bak.1760023095:142:    container_name: tdp-frontend
+  platform/compose/compose.yml.bak.1760023095:149:    container_name: portainer
+  platform/compose/grafana/provisioning/datasources/datasources.yml:6:    url: http://prometheus:9090
+  platform/compose/grafana/provisioning/datasources/datasources.yml:11:    url: http://loki:3100
+  platform/compose/metrics.addon.yml:1:services:
+  platform/compose/metrics.addon.yml:4:    container_name: node-exporter
+  platform/compose/metrics.addon.yml:15:    container_name: cadvisor
+  platform/compose/metrics.addon.yml:29:    container_name: postgres-exporter
+  platform/compose/day8-1.override.yml:1:services:
+  platform/compose/day8-1.override.yml:3:    container_name: tdp-storefront
+  platform/compose/grafana.writable.override.yml:1:services:
+  platform/compose/grafana.writable.override.yml:2:  grafana:
+  platform/compose/promtail-config.yml:9:  - url: http://loki:3100/loki/api/v1/push
+  platform/compose/disable-legacy.override.yml:1:services:
+  platform/compose/portainer-firstboot.override.yml:1:services:
+  platform/compose/prometheus.rules.fix.override.yml:1:services:
+  platform/compose/prometheus.rules.fix.override.yml:2:  prometheus:
+  platform/compose/observability.addon.yml:1:services:
+  platform/compose/observability.addon.yml:2:  prometheus:
+  platform/compose/grafana.provisioning.yml.disabled:1:services:
+  platform/compose/grafana.provisioning.yml.disabled:2:  grafana:
+  platform/compose/grafana.provisioning.yml.disabled:9:        target: /etc/grafana/provisioning
+  platform/compose/compose.yml:1:services:
+  platform/compose/compose.yml:4:    container_name: promtail
+  platform/compose/compose.yml:20:    container_name: pg
+  platform/compose/compose.yml:32:    container_name: rabbitmq
+  platform/compose/compose.yml:52:    container_name: catalog-api
+  platform/compose/compose.yml:75:    container_name: inventory-worker
+  platform/compose/compose.yml:87:  loki:
+  platform/compose/compose.yml:88:    image: grafana/loki:2.9.8
+  platform/compose/compose.yml:90:# # # #       - -config.file=/etc/loki/local-config.yaml
+  platform/compose/compose.yml:96:  prometheus:
+  platform/compose/compose.yml:97:    image: prom/prometheus:v2.54.1
+  platform/compose/compose.yml:98:    container_name: prometheus
+  platform/compose/compose.yml:111:  grafana:
+  platform/compose/compose.yml:112:    image: grafana/grafana:11.2.0
+  platform/compose/compose.yml:113:    container_name: grafana
+  platform/compose/compose.yml:130:    container_name: portainer
+  platform/compose/compose.yml:145:    container_name: orders-api
+  platform/compose/compose.yml:162:    container_name: payments-api
+  platform/compose/compose.yml:179:    container_name: ai-worker
+  platform/compose/grafana.persistence.yml.disabled:1:services:
+  platform/compose/grafana.persistence.yml.disabled:2:  grafana:
+  platform/compose/_archive.persistence.addon.yml.disabled:1:services:
+  platform/compose/_archive.persistence.addon.yml.disabled:2:  grafana:
+  platform/compose/_archive.persistence.addon.yml.disabled:3:    image: grafana/grafana:latest
+  platform/compose/_archive.persistence.addon.yml.disabled:11:      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+  platform/compose/_archive.persistence.addon.yml.disabled:14:  prometheus:
+  platform/compose/_archive.persistence.addon.yml.disabled:15:    image: prom/prometheus:v2.54.1
+  platform/compose/_archive.persistence.addon.yml.disabled:27:  loki:
+  platform/compose/_archive.persistence.addon.yml.disabled:28:    image: grafana/loki:2.9.8
+  platform/compose/_archive.persistence.addon.yml.disabled:31:    command: ["-config.file=/etc/loki/loki-config.yml"]
+  platform/compose/_archive.persistence.addon.yml.disabled:33:      - ./observability/loki-config.yml:/etc/loki/loki-config.yml:ro
+  platform/compose/loki.config.yml.disabled:1:services:
+  platform/compose/loki.config.yml.disabled:2:  loki:
+  platform/compose/loki.config.yml.disabled:3:    command: -config.file=/etc/loki/config.yml
+  platform/compose/loki.config.yml.disabled:5:      - ../observability/loki/config.yml:/etc/loki/config.yml:ro
+  platform/compose/compose.yml.bak.20251009-212227:1:services:
+  platform/compose/compose.yml.bak.20251009-212227:11:      loki:
+  platform/compose/compose.yml.bak.20251009-212227:21:    container_name: pg
+  platform/compose/compose.yml.bak.20251009-212227:33:    container_name: rabbitmq
+  platform/compose/compose.yml.bak.20251009-212227:53:    container_name: catalog-api
+  platform/compose/compose.yml.bak.20251009-212227:76:    container_name: inventory-worker
+  platform/compose/compose.yml.bak.20251009-212227:88:  loki:
+  platform/compose/compose.yml.bak.20251009-212227:89:    image: grafana/loki:2.9.8
+  platform/compose/compose.yml.bak.20251009-212227:91:      - -config.file=/etc/loki/local-config.yaml
+  platform/compose/compose.yml.bak.20251009-212227:97:  prometheus:
+  platform/compose/compose.yml.bak.20251009-212227:98:    image: prom/prometheus:v2.54.1
+  platform/compose/compose.yml.bak.20251009-212227:99:    container_name: prometheus
+  platform/compose/compose.yml.bak.20251009-212227:110:  grafana:
+  platform/compose/compose.yml.bak.20251009-212227:111:    image: grafana/grafana:11.2.0
+  platform/compose/compose.yml.bak.20251009-212227:112:    container_name: grafana
+  platform/compose/compose.yml.bak.20251009-212227:120:      - ./observability/grafana-provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+  platform/compose/compose.yml.bak.20251009-212227:130:    container_name: tdp-frontend
+  platform/compose/compose.yml.bak.20251009-212227:137:    container_name: portainer
+  platform/compose/compose.yml.bak.1760024560:1:services:
+  platform/compose/compose.yml.bak.1760024560:11:      loki:
+  platform/compose/compose.yml.bak.1760024560:20:    container_name: pg
+  platform/compose/compose.yml.bak.1760024560:31:    container_name: rabbitmq
+  platform/compose/compose.yml.bak.1760024560:54:    container_name: catalog-api
+  platform/compose/compose.yml.bak.1760024560:76:    container_name: inventory-worker
+  platform/compose/compose.yml.bak.1760024560:87:  loki:
+  platform/compose/compose.yml.bak.1760024560:88:    image: grafana/loki:2.9.8
+  platform/compose/compose.yml.bak.1760024560:90:      - -config.file=/etc/loki/local-config.yaml
+  platform/compose/compose.yml.bak.1760024560:95:  prometheus:
+  platform/compose/compose.yml.bak.1760024560:96:    image: prom/prometheus:v2.54.1
+  platform/compose/compose.yml.bak.1760024560:97:    container_name: prometheus
+  platform/compose/compose.yml.bak.1760024560:107:  grafana:
+  platform/compose/compose.yml.bak.1760024560:108:    image: grafana/grafana:11.2.0
+  platform/compose/compose.yml.bak.1760024560:109:    container_name: grafana
+  platform/compose/compose.yml.bak.1760024560:117:      - ./observability/grafana-provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+  platform/compose/compose.yml.bak.1760024560:131:    container_name: tdp-frontend
+  platform/compose/compose.yml.bak.1760024560:137:    container_name: portainer
+  platform/compose/observability.clean.yml:1:services:
+  platform/compose/observability.clean.yml:2:  loki:
+  platform/compose/observability.clean.yml:3:    container_name: loki
+  platform/compose/observability.clean.yml:4:    image: grafana/loki:2.9.8
+  platform/compose/observability.clean.yml:5:    command: -config.file=/etc/loki/config.yml
+  platform/compose/observability.clean.yml:8:      - ../observability/loki/config.yml:/etc/loki/config.yml:ro
+  platform/compose/observability.clean.yml:14:  grafana:
+  platform/compose/observability.clean.yml:15:    container_name: grafana
+  platform/compose/observability.clean.yml:16:    image: grafana/grafana:11.2.0
+  platform/compose/observability.clean.yml:18:      loki:
+  platform/compose/observability.clean.yml:20:      prometheus:
+  platform/compose/observability.clean.yml:25:      GF_PATHS_PROVISIONING: /etc/grafana/provisioning
+  platform/compose/observability.clean.yml:30:      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+  platform/compose/grafana/provisioning/dashboards/dashboards.yml:9:      path: /etc/grafana/provisioning/dashboards/Homelab
+  platform/compose/grafana/provisioning/dashboards/dashboards.yml:16:      path: /etc/grafana/provisioning/dashboards/Observability
+  platform/compose/cadvisor.unpublish.override.yml:1:services:
+  platform/compose/grafana-provisioning/datasources/prometheus.yaml:6:    url: http://prometheus:9090
+  platform/compose/storefront.addon.yml:1:services:
+  platform/compose/storefront.addon.yml:3:    container_name: tdp-storefront
+  platform/compose/grafana.provisioning.path.override.yml.disabled:1:services:
+  platform/compose/grafana.provisioning.path.override.yml.disabled:2:  grafana:
+  platform/compose/observability/grafana-provisioning/datasources/prometheus.yaml:6:    url: http://prometheus:9090
+
+## B) All top-level compose/addon files (active & drift)
+  platform/compose/grafana.provisioning.CLEAN.yml
+  platform/compose/day101.override.yml
+  platform/compose/storefront.addon.yml
+  platform/compose/grafana.external.volume.override.yml
+  platform/compose/compose.yml
+  platform/compose/observability.addon.yml
+  platform/compose/portainer-firstboot.override.yml
+  platform/compose/disable-legacy.override.yml
+  platform/compose/grafana.writable.override.yml
+  platform/compose/metrics.addon.yml
+  platform/compose/prometheus.yml
+  platform/compose/cadvisor.unpublish.override.yml
+  platform/compose/observability.clean.yml
+  platform/compose/prometheus.rules.fix.override.yml
+  platform/compose/promtail-config.yml
+  platform/compose/day8-1.override.yml
+  platform/compose/hardening.addon.yml
+  platform/compose/persistence.addon.yml
+
+## C) Known-bad paths we saw before (duplicates/wrong binds)
+  platform/compose/persistence.addon.yml:11:      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+  platform/compose/persistence.addon.yml:30:# # # #     command: ["-config.file=/etc/loki/loki-config.yml"]
+  platform/compose/persistence.addon.yml:32:#       - ./observability/loki-config.yml:/etc/loki/loki-config.yml:ro
+  platform/compose/compose.yml.bak.1760023095:84:      - -config.file=/etc/loki/local-config.yaml
+  platform/compose/compose.yml.bak.1760023095:126:      - ./observability/grafana-provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+  platform/compose/compose.yml:90:# # # #       - -config.file=/etc/loki/local-config.yaml
+  platform/compose/grafana.provisioning.yml.disabled:9:        target: /etc/grafana/provisioning
+  platform/compose/compose.yml.bak.20251009-212227:91:      - -config.file=/etc/loki/local-config.yaml
+  platform/compose/compose.yml.bak.20251009-212227:120:      - ./observability/grafana-provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+  platform/compose/compose.yml.bak.1760024560:90:      - -config.file=/etc/loki/local-config.yaml
+  platform/compose/compose.yml.bak.1760024560:117:      - ./observability/grafana-provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+  platform/compose/_archive.persistence.addon.yml.disabled:11:      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+  platform/compose/_archive.persistence.addon.yml.disabled:31:    command: ["-config.file=/etc/loki/loki-config.yml"]
+  platform/compose/_archive.persistence.addon.yml.disabled:33:      - ./observability/loki-config.yml:/etc/loki/loki-config.yml:ro
+  platform/compose/grafana.provisioning.addon.yml.disabled:4:      - ./platform/compose/observability/grafana-provisioning:/etc/grafana/provisioning:ro
+  platform/compose/loki.config.yml.disabled:3:    command: -config.file=/etc/loki/config.yml
+  platform/compose/loki.config.yml.disabled:5:      - ../observability/loki/config.yml:/etc/loki/config.yml:ro
+  platform/compose/observability.clean.yml:5:    command: -config.file=/etc/loki/config.yml
+  platform/compose/observability.clean.yml:8:      - ../observability/loki/config.yml:/etc/loki/config.yml:ro
+  platform/compose/observability.clean.yml:25:      GF_PATHS_PROVISIONING: /etc/grafana/provisioning
+  platform/compose/observability.clean.yml:30:      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+  platform/compose/grafana.provisioning.CLEAN.yml:4:      # bind our clean tree at /etc/grafana/provisioning
+  platform/compose/grafana.provisioning.CLEAN.yml:5:      - ./platform/compose/grafana/provisioning:/etc/grafana/provisioning:ro
+  platform/compose/_bak/compose.yml.pre-fix.1760284172:85:#       - -config.file=/etc/loki/local-config.yaml
+  platform/compose/_bak/compose.yml.pre-fix.1760284172:117:#       - ./observability/grafana-provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+  platform/compose/_bak/compose.yml.bak.1760280058:85:      - -config.file=/etc/loki/local-config.yaml
+  platform/compose/_bak/compose.yml.bak.1760280058:117:      - ./observability/grafana-provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+  platform/compose/_bak/compose.yml.bak.1760267574:85:      - -config.file=/etc/loki/local-config.yaml
+  platform/compose/_bak/compose.yml.pre-catalog.bak.1760284020:85:#       - -config.file=/etc/loki/local-config.yaml
+  platform/compose/_bak/compose.yml.pre-catalog.bak.1760284020:117:#       - ./observability/grafana-provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+  platform/compose/_bak/compose.yml.bak.20251012-220930:90:      - -config.file=/etc/loki/local-config.yaml
+  platform/compose/_bak/compose.yml.bak.20251012-220930:124:      - ./observability/grafana-provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+  platform/compose/_bak/compose.yml.bak.1760267426:85:      - -config.file=/etc/loki/local-config.yaml
+  platform/compose/_bak/compose.yml.bak.1760265637:85:      - -config.file=/etc/loki/local-config.yaml
+  platform/compose/_bak/compose.yml.bak.1760265637:117:      - ./observability/grafana-provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+  platform/compose/_bak/persistence.addon.yml.bak.1760263315:11:      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+  platform/compose/_bak/persistence.addon.yml.bak.1760263315:31:    command: ["-config.file=/etc/loki/loki-config.yml"]
+  platform/compose/_bak/persistence.addon.yml.bak.1760263315:33:      - ./observability/loki-config.yml:/etc/loki/loki-config.yml:ro
+  platform/compose/_bak/persistence.addon.yml.bak.1760263576:11:      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+  platform/compose/_bak/persistence.addon.yml.bak.1760263576:31:    command: ["-config.file=/etc/loki/loki-config.yml"]
+  platform/compose/_bak/persistence.addon.yml.bak.1760263576:33:      - ./observability/loki-config.yml:/etc/loki/loki-config.yml:ro
+  platform/compose/_bak/persistence.addon.yml.bak.1760281574:11:      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+  platform/compose/_bak/persistence.addon.yml.bak.1760281574:31:    command: ["-config.file=/etc/loki/loki-config.yml"]
+  platform/compose/_bak/persistence.addon.yml.bak.1760281574:33:      - ./observability/loki-config.yml:/etc/loki/loki-config.yml:ro
+  platform/compose/_bak/persistence.addon.yml.bak.1760263479:11:      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+  platform/compose/_bak/persistence.addon.yml.bak.1760263479:31:    command: ["-config.file=/etc/loki/loki-config.yml"]
+  platform/compose/_bak/persistence.addon.yml.bak.1760263479:33:      - ./observability/loki-config.yml:/etc/loki/loki-config.yml:ro
+  platform/compose/_bak/persistence.addon.yml.bak.1760263511:11:      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+  platform/compose/_bak/persistence.addon.yml.bak.1760263511:31:    command: ["-config.file=/etc/loki/loki-config.yml"]
+  platform/compose/_bak/persistence.addon.yml.bak.1760263511:33:      - ./observability/loki-config.yml:/etc/loki/loki-config.yml:ro
+  platform/compose/_bak/persistence.addon.yml.bak.fix.1760263119:11:      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+  platform/compose/_bak/persistence.addon.yml.bak.fix.1760263119:31:    command: ["-config.file=/etc/loki/loki-config.yml"]
+  platform/compose/_bak/persistence.addon.yml.bak.fix.1760263119:33:      - ./observability/loki-config.yml:/etc/loki/loki-config.yml:ro
+  platform/compose/grafana/provisioning/dashboards/dashboards.yml:9:      path: /etc/grafana/provisioning/dashboards/Homelab
+  platform/compose/grafana/provisioning/dashboards/dashboards.yml:16:      path: /etc/grafana/provisioning/dashboards/Observability
+
+## D) Any grafana provisioning trees on disk
+  platform/observability/grafana-provisioning
+  platform/observability/grafana-provisioning/plugins
+  platform/observability/grafana-provisioning/dashboards
+  platform/observability/grafana-provisioning/alerting
+  platform/observability/grafana-provisioning/datasources
+  platform/observability/grafana-provisioning/access-control
+  platform/observability/grafana-provisioning/notifiers
+  platform/compose/grafana
+  platform/compose/grafana/provisioning
+  platform/compose/grafana/provisioning/plugins
+  platform/compose/grafana/provisioning/dashboards
+  platform/compose/grafana/provisioning/dashboards/dashboards.yml
+  platform/compose/grafana/provisioning/dashboards/Observability
+  platform/compose/grafana/provisioning/dashboards/Observability/Loki Dashboard quick search.json
+  platform/compose/grafana/provisioning/dashboards/Observability/Prometheus 2.0 Overview.json
+  platform/compose/grafana/provisioning/dashboards/Observability/RabbitMQ-Overview.json
+  platform/compose/grafana/provisioning/dashboards/Observability/Docker and system monitoring.json
+  platform/compose/grafana/provisioning/dashboards/Observability/Node Exporter Full.json
+  platform/compose/grafana/provisioning/dashboards/Observability/Node Exporter Full.json.tmp
+  platform/compose/grafana/provisioning/dashboards/json
+  platform/compose/grafana/provisioning/dashboards/json/.keep
+  platform/compose/grafana/provisioning/dashboards/_bak_20251013-0141
+  platform/compose/grafana/provisioning/dashboards/_bak_20251013-0141/TDP — Containers.json
+  platform/compose/grafana/provisioning/dashboards/_bak_20251013-0141/TDP — Storefront.json
+  platform/compose/grafana/provisioning/dashboards/_bak_20251013-0141/Loki Dashboard quick search.json
+  platform/compose/grafana/provisioning/dashboards/_bak_20251013-0141/TDP — Postgres.json
+  platform/compose/grafana/provisioning/dashboards/_bak_20251013-0141/Prometheus 2.0 Overview.json
+  platform/compose/grafana/provisioning/dashboards/_bak_20251013-0141/RabbitMQ-Overview.json
+  platform/compose/grafana/provisioning/dashboards/_bak_20251013-0141/TDP — Logs (Loki).json
+  platform/compose/grafana/provisioning/dashboards/_bak_20251013-0141/Docker and system monitoring.json
+  platform/compose/grafana/provisioning/dashboards/_bak_20251013-0141/Node Exporter Full.json
+  platform/compose/grafana/provisioning/dashboards/_bak_20251013-0141/TDP — Overview.json
+  platform/compose/grafana/provisioning/dashboards/Homelab
+  platform/compose/grafana/provisioning/dashboards/Homelab/TDP — Containers.json
+  platform/compose/grafana/provisioning/dashboards/Homelab/TDP — Storefront.json
+  platform/compose/grafana/provisioning/dashboards/Homelab/TDP — Postgres.json
+  platform/compose/grafana/provisioning/dashboards/Homelab/TDP — Logs (Loki).json
+  platform/compose/grafana/provisioning/dashboards/Homelab/TDP — Overview.json
+  platform/compose/grafana/provisioning/alerting
+  platform/compose/grafana/provisioning/datasources
+  platform/compose/grafana/provisioning/datasources/datasources.yml
+  platform/compose/grafana/provisioning/datasources/.keep
+  platform/compose/grafana-provisioning
+  platform/compose/grafana-provisioning/dashboards
+  platform/compose/grafana-provisioning/datasources
+  platform/compose/grafana-provisioning/datasources/prometheus.yaml
+  platform/compose/platform/compose/grafana
+  platform/compose/platform/compose/grafana/provisioning
+  platform/compose/platform/compose/grafana/provisioning/datasources
+  platform/compose/platform/compose/grafana-provisioning
+  platform/compose/platform/compose/grafana-provisioning/dashboards
+  platform/compose/platform/compose/observability/grafana-provisioning
+  platform/compose/grafana.provisioning.CLEAN.yml
+  platform/compose/grafana.provisioning.path.override.yml.disabled
+  platform/compose/observability/grafana-provisioning
+  platform/compose/observability/grafana-provisioning/plugins
+  platform/compose/observability/grafana-provisioning/dashboards
+  platform/compose/observability/grafana-provisioning/dashboards/dashboards.yaml
+  platform/compose/observability/grafana-provisioning/alerting
+  platform/compose/observability/grafana-provisioning/datasources
+  platform/compose/observability/grafana-provisioning/datasources/prometheus.yaml
+  platform/compose/observability/grafana-provisioning/datasources/.keep
+  platform/compose/grafana.provisioning.addon.yml.disabled
+  platform/compose/grafana.provisioning.yml.disabled
+
+## E) Loki config files (all candidates)
+  platform/observability/loki/config.yml
+  platform/compose/observability/loki-config.yml
+
+## F) Containers (incl exited) of interest
+grafana	grafana/grafana:latest	Up 21 minutes	0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp
+loki	grafana/loki:2.9.8	Up 2 hours	0.0.0.0:3100->3100/tcp, [::]:3100->3100/tcp
+prometheus	prom/prometheus:v2.54.1	Up 3 hours	0.0.0.0:9090->9090/tcp, [::]:9090->9090/tcp
+rabbitmq	rabbitmq:3-management	Up 3 hours (healthy)	4369/tcp, 5671/tcp, 0.0.0.0:5672->5672/tcp, [::]:5672->5672/tcp, 15671/tcp, 0.0.0.0:15672->15672/tcp, [::]:15672->15672/tcp, 15691/tcp, 25672/tcp, 0.0.0.0:15692->15692/tcp, [::]:15692->15692/tcp
+pg	postgres:16	Up 3 hours	0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp
+node-exporter	prom/node-exporter:v1.8.2	Up 6 hours	
+cadvisor	gcr.io/cadvisor/cadvisor:v0.47.2	Up 6 hours (healthy)	8080/tcp
+
+## G) Mounts for grafana/loki/prometheus
+### grafana
+  volume	/var/lib/docker/volumes/tdp_grafana-data/_data -> /var/lib/grafana
+  bind	/home/farrukh/the-devops-playground/platform/compose/platform/compose/grafana/provisioning -> /etc/grafana/provisioning
+### loki
+  volume	/var/lib/docker/volumes/tdp_loki-data/_data -> /loki
+  bind	/home/farrukh/the-devops-playground/platform/observability/loki/config.yml -> /etc/loki/config.yml
+### prometheus
+  bind	/home/farrukh/the-devops-playground/platform/compose/alert.rules.yml -> /etc/prometheus/alert.rules.yml
+  volume	/var/lib/docker/volumes/tdp_prometheus-data/_data -> /prometheus
+  bind	/home/farrukh/the-devops-playground/platform/observability/prometheus.yml -> /etc/prometheus/prometheus.yml
+
+## H) Named volumes (tdp*)
+tdp_grafana-data
+tdp_loki-data
+tdp_pg-data
+tdp_pgdata
+tdp_portainer_data
+tdp_prometheus-data
+tdp_promtail-positions
+tdp_rabbitmq-data
+
+## I) Grafana API health + datasources (if available)
+  Grafana health OK
+    Loki	loki	default=false	http://loki:3100
+    Prometheus	prometheus	default=true	http://prometheus:9090

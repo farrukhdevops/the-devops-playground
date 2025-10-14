@@ -1,0 +1,231 @@
+global:
+  scrape_interval: 15s
+  scrape_timeout: 10s
+  scrape_protocols:
+    - OpenMetricsText1.0.0
+    - OpenMetricsText0.0.1
+    - PrometheusText0.0.4
+  evaluation_interval: 1m
+runtime:
+  gogc: 75
+scrape_configs:
+  - job_name: prometheus
+    honor_timestamps: true
+    track_timestamps_staleness: false
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    scrape_protocols:
+      - OpenMetricsText1.0.0
+      - OpenMetricsText0.0.1
+      - PrometheusText0.0.4
+    metrics_path: /metrics
+    scheme: http
+    enable_compression: true
+    follow_redirects: true
+    enable_http2: true
+    static_configs:
+      - targets:
+          - prometheus:9090
+  - job_name: loki
+    honor_timestamps: true
+    track_timestamps_staleness: false
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    scrape_protocols:
+      - OpenMetricsText1.0.0
+      - OpenMetricsText0.0.1
+      - PrometheusText0.0.4
+    metrics_path: /metrics
+    scheme: http
+    enable_compression: true
+    follow_redirects: true
+    enable_http2: true
+    static_configs:
+      - targets:
+          - loki:3100
+  - job_name: rabbitmq
+    honor_timestamps: true
+    track_timestamps_staleness: false
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    scrape_protocols:
+      - OpenMetricsText1.0.0
+      - OpenMetricsText0.0.1
+      - PrometheusText0.0.4
+    metrics_path: /metrics
+    scheme: http
+    enable_compression: true
+    follow_redirects: true
+    enable_http2: true
+    static_configs:
+      - targets:
+          - rabbitmq:15692
+  - job_name: orders-api
+    honor_timestamps: true
+    track_timestamps_staleness: false
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    scrape_protocols:
+      - OpenMetricsText1.0.0
+      - OpenMetricsText0.0.1
+      - PrometheusText0.0.4
+    metrics_path: /metrics
+    scheme: http
+    enable_compression: true
+    follow_redirects: true
+    enable_http2: true
+    static_configs:
+      - targets:
+          - orders-api:8000
+        labels:
+          env: local
+  - job_name: payments-api
+    honor_timestamps: true
+    track_timestamps_staleness: false
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    scrape_protocols:
+      - OpenMetricsText1.0.0
+      - OpenMetricsText0.0.1
+      - PrometheusText0.0.4
+    metrics_path: /metrics
+    scheme: http
+    enable_compression: true
+    follow_redirects: true
+    enable_http2: true
+    static_configs:
+      - targets:
+          - payments-api:8000
+        labels:
+          env: local
+  - job_name: node-exporter
+    honor_timestamps: true
+    track_timestamps_staleness: false
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    scrape_protocols:
+      - OpenMetricsText1.0.0
+      - OpenMetricsText0.0.1
+      - PrometheusText0.0.4
+    metrics_path: /metrics
+    scheme: http
+    enable_compression: true
+    follow_redirects: true
+    enable_http2: true
+    static_configs:
+      - targets:
+          - host.docker.internal:9100
+          - 172.17.0.1:9100
+  - job_name: cadvisor
+    honor_timestamps: true
+    track_timestamps_staleness: false
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    scrape_protocols:
+      - OpenMetricsText1.0.0
+      - OpenMetricsText0.0.1
+      - PrometheusText0.0.4
+    metrics_path: /metrics
+    scheme: http
+    enable_compression: true
+    follow_redirects: true
+    enable_http2: true
+    static_configs:
+      - targets:
+          - cadvisor:8080
+  - job_name: promtail
+    honor_timestamps: true
+    track_timestamps_staleness: false
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    scrape_protocols:
+      - OpenMetricsText1.0.0
+      - OpenMetricsText0.0.1
+      - PrometheusText0.0.4
+    metrics_path: /metrics
+    scheme: http
+    enable_compression: true
+    follow_redirects: true
+    enable_http2: true
+    static_configs:
+      - targets:
+          - promtail:9080
+  - job_name: catalog-api
+    honor_timestamps: true
+    track_timestamps_staleness: false
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    scrape_protocols:
+      - OpenMetricsText1.0.0
+      - OpenMetricsText0.0.1
+      - PrometheusText0.0.4
+    metrics_path: /metrics
+    scheme: http
+    enable_compression: true
+    follow_redirects: true
+    enable_http2: true
+    static_configs:
+      - targets:
+          - catalog-api:8000
+  - job_name: ai-worker
+    honor_timestamps: true
+    track_timestamps_staleness: false
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    scrape_protocols:
+      - OpenMetricsText1.0.0
+      - OpenMetricsText0.0.1
+      - PrometheusText0.0.4
+    metrics_path: /metrics
+    scheme: http
+    enable_compression: true
+    follow_redirects: true
+    enable_http2: true
+    static_configs:
+      - targets:
+          - ai-worker:9101
+  - job_name: inventory-worker
+    honor_timestamps: true
+    track_timestamps_staleness: false
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    scrape_protocols:
+      - OpenMetricsText1.0.0
+      - OpenMetricsText0.0.1
+      - PrometheusText0.0.4
+    metrics_path: /metrics
+    scheme: http
+    enable_compression: true
+    follow_redirects: true
+    enable_http2: true
+    static_configs:
+      - targets:
+          - inventory-worker:9102
+  - job_name: postgres
+    honor_timestamps: true
+    track_timestamps_staleness: false
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    scrape_protocols:
+      - OpenMetricsText1.0.0
+      - OpenMetricsText0.0.1
+      - PrometheusText0.0.4
+    metrics_path: /metrics
+    scheme: http
+    enable_compression: true
+    follow_redirects: true
+    enable_http2: true
+    static_configs:
+      - targets:
+          - postgres-exporter:9187
+  - job_name: storefront
+    metrics_path: /metrics
+    scrape_interval: 15s
+    static_configs:
+      - targets:
+          - 172.18.0.10:3000
+          - 172.18.0.1:8080
+          - tdp-storefront-1:3000
+          - storefront:3000
+rule_files:
+  - /etc/prometheus/storefront.rules.yml

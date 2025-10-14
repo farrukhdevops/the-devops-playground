@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+root="$(pwd)"
+echo "### Repo: $root"
+echo "### Time: $(date -Iseconds)"
+echo
+
+echo "## A) Compose files that mention grafana/loki/prometheus and provisioning paths"
+rg -n -S --glob '!**/_bak/**' --glob '!**/archive/**' \
+  -e 'services:' \
+  -e 'grafana:' -e 'loki:' -e 'prometheus:' \
+  -e '/etc/grafana' -e '/etc/loki' -e 'container_name:' \
+  platform/compose | sed 's/^/  /' || true
+echo
+
+echo "## B) All top-level compose/addon files (active & drift)"
+find platform/compose -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) \
+  | sed 's/^/  /'
+echo
+
+echo "## C) Known-bad paths we saw before (duplicates/wrong binds)"
+rg -n -S 'platform/compose/platform/compose|/etc/grafana/provisioning|/etc/loki' platform/compose \
+  | sed 's/^/  /' || true
+echo
+
+echo "## D) Any grafana provisioning trees on disk"
+find platform -type d -iname '*grafana*' -o -ipath '*provisioning*' \
+  | sed 's/^/  /' || true
+echo
+
+echo "## E) Loki config files (all candidates)"
+find platform -type f -ipath '*loki*' \( -name 'config*.yml' -o -name 'loki-config.yml' -o -name 'local-config.yaml' \) \
+  | sed 's/^/  /' || true
+echo
+
+echo "## F) Containers (incl exited) of interest"
+docker ps -a --format '  {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}' \
+  | grep -E '(^| )grafana|(^| )loki|(^| )prometheus|(^| )pg|(^| )rabbitmq|(^| )storefront|(^| )node-exporter|(^| )cadvisor' || true
+echo
+
+echo "## G) Mounts for grafana/loki/prometheus"
+for s in grafana loki prometheus; do
+  echo "### $s"
+  docker inspect -f '{{json .Mounts}}' "$s" 2>/dev/null \
+    | jq -r '.[]
+      | "  \(.Type)\t\(.Source) -> \(.Destination)"' || echo "  (not running)"
+done
+echo
+
+echo "## H) Named volumes (tdp*)"
+docker volume ls --format '  {{.Name}}' | grep -E '^tdp' || echo "  (none)"
+echo
+
+echo "## I) Grafana API health + datasources (if available)"
+AUTH="${AUTH:-admin:devopsplayground}"
+GURL="${GURL:-http://localhost:3000}"
+if curl -fsS -u "$AUTH" "$GURL/api/health" >/dev/null 2>&1; then
+  echo "  Grafana health OK"
+  curl -fsS -u "$AUTH" "$GURL/api/datasources" \
+    | jq -r '.[]
+      | "    \(.name)\t\(.type)\tdefault=\(.isDefault)\t\(.url)"'
+else
+  echo "  Grafana not reachable or auth failed"
+fi

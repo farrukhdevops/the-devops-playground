@@ -1,0 +1,30 @@
+{
+  "title": "RabbitMQ — Overview",
+  "uid": "rabbitmq-overview",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "10s",
+  "panels": [
+    { "type":"stat","title":"Connections",
+      "gridPos":{"x":0,"y":0,"w":6,"h":4},
+      "targets":[ { "expr":"sum(rabbitmq_connections)", "legendFormat":"connections" } ] },
+    { "type":"stat","title":"Channels",
+      "gridPos":{"x":6,"y":0,"w":6,"h":4},
+      "targets":[ { "expr":"sum(rabbitmq_channels)", "legendFormat":"channels" } ] },
+    { "type":"stat","title":"Consumers",
+      "gridPos":{"x":12,"y":0,"w":6,"h":4},
+      "targets":[ { "expr":"sum(rabbitmq_consumers)", "legendFormat":"consumers" } ] },
+    { "type":"stat","title":"Queues",
+      "gridPos":{"x":18,"y":0,"w":6,"h":4},
+      "targets":[ { "expr":"count(rabbitmq_queue_messages_ready)", "legendFormat":"queues" } ] },
+    { "type":"timeseries","title":"Messages ready (by queue)",
+      "gridPos":{"x":0,"y":4,"w":12,"h":6},
+      "targets":[ { "expr":"sum by (queue) (rabbitmq_queue_messages_ready)", "legendFormat":"{{queue}}" } ] },
+    { "type":"timeseries","title":"Publish vs Deliver/sec",
+      "gridPos":{"x":12,"y":4,"w":12,"h":6},
+      "targets":[
+        { "expr":"sum(rate(rabbitmq_global_messages_published_total[2m]))", "legendFormat":"publish" },
+        { "expr":"sum(rate(rabbitmq_global_messages_delivered_total[2m]))", "legendFormat":"deliver" }
+      ] }
+  ]
+}

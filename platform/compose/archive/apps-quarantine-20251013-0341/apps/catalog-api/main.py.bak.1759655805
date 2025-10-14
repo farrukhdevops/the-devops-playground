@@ -1,0 +1,63 @@
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+import os, json
+import pika
+from urllib.parse import urlparse
+
+app = FastAPI(title="catalog-api")
+
+class ProductIn(BaseModel):
+    name: str
+    description: str | None = None
+
+@app.get("/healthz")
+def healthz():
+    return {"status": "ok"}
+
+def rmq_params():
+    url = os.getenv("RABBITMQ_URL", "").strip()
+    if url:
+        u = urlparse(url)
+        user = u.username or "guest"
+        pwd  = u.password or "guest"
+        host = u.hostname or "rabbitmq"
+        port = u.port or 5672
+        vhost = u.path[1:] if u.path and len(u.path) > 1 else "/"
+        return pika.ConnectionParameters(host=host, port=port,
+                                         virtual_host=vhost,
+                                         credentials=pika.PlainCredentials(user, pwd))
+    # discrete vars fallback
+    host = os.getenv("RABBITMQ_HOST", "rabbitmq")
+    port = int(os.getenv("RABBITMQ_PORT", "5672"))
+    user = os.getenv("RABBITMQ_USER", "guest")
+    pwd  = os.getenv("RABBITMQ_PASS", "guest")
+    vhost = os.getenv("RABBITMQ_VHOST", "/")
+    return pika.ConnectionParameters(host=host, port=port,
+                                     virtual_host=vhost,
+                                     credentials=pika.PlainCredentials(user, pwd))
+
+@app.post("/products")
+def create_product(p: ProductIn):
+    try:
+        conn = pika.BlockingConnection(rmq_params())
+        ch = conn.channel()
+        exch = os.getenv("CATALOG_EXCHANGE", "catalog")
+        rk   = os.getenv("CATALOG_ROUTING_KEY", "product.created")
+        ch.exchange_declare(exchange=exch, exchange_type="topic", durable=True)
+        body = json.dumps({"name": p.name, "description": p.description}).encode()
+        ch.basic_publish(exchange=exch, routing_key=rk, body=body)
+        conn.close()
+        return {"queued": True, "name": p.name, "routing_key": rk}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"RMQ publish failed: {e}")
+
+# --- Day6 Observability: Prometheus metrics ---
+try:
+    from prometheus_fastapi_instrumentator import Instrumentator
+    @app.on_event("startup")
+    async def _metrics_startup():
+        Instrumentator().instrument(app).expose(app, endpoint="/metrics")
+except Exception as _e:
+    # Keep app running even if metrics package is missing
+    pass
+# --- /Day6 ---

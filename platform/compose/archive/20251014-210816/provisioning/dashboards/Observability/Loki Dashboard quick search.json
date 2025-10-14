@@ -1,0 +1,1 @@
+{"title":"Loki Dashboard quick search","tags":["loki","logs"],"panels":[{"type":"stat","title":"Log volume (last 5m)","datasource":"Loki","targets":[{"expr":"sum(count_over_time({job=\"docker-logs\"}[5m]))"}]},{"type":"logs","title":"Recent logs","datasource":"Loki","targets":[{"expr":"{job=\"docker-logs\"}"}]}],"schemaVersion":39,"version":1}

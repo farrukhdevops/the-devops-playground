@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Robust builds with proper pipeline exit codes captured.
+set -u  # (no -e/pipefail here; we handle statuses manually)
+
+compose="docker compose -p tdp -f platform/compose/compose.yml -f platform/compose/local.override.yml"
+
+build_one () {
+  local svc="$1"
+  echo "=== Building: ${svc} ==="
+  # Capture the *leftmost* command's exit status even when piped to tee
+  # Bash: ${PIPESTATUS[0]}  (works because we run under /usr/bin/env bash)
+  { ${compose} build --no-cache "${svc}" 2>&1 | tee "build.${svc}.log" ; } ; status=${PIPESTATUS[0]}
+  if [[ ${status} -ne 0 ]]; then
+    echo "!!! BUILD FAILED for ${svc} (exit ${status}). See build.${svc}.log"
+    return ${status}
+  fi
+  echo "=== OK: ${svc} ==="
+}
+
+# Build in a fixed order (change as you like)
+failed=()
+for svc in catalog-api orders-api payments-api tdp-frontend inventory-worker; do
+  if ! build_one "${svc}"; then
+    failed+=("${svc}")
+  fi
+done
+
+if (( ${#failed[@]} )); then
+  echo
+  echo "Some builds FAILED: ${failed[*]}"
+  exit 1
+else
+  echo
+  echo "All app builds succeeded."
+fi

@@ -1,0 +1,3 @@
+services:
+  loki:
+    container_name: loki

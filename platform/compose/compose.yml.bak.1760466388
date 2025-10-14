@@ -1,0 +1,175 @@
+name: tdp
+
+services:
+  # --- Core data plane ---
+  pg:
+    image: postgres:16
+    container_name: pg
+    environment:
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -h localhost -p 5432"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # --- Observability ---
+  loki:
+    image: grafana/loki:2.9.8
+    container_name: loki
+    command: ["-config.file=/etc/loki/config.yml"]
+    volumes:
+      - loki-data:/loki
+      - ${PWD}/platform/observability/loki/config.yml:/etc/loki/config.yml:ro
+
+  promtail:
+    image: grafana/promtail:2.9.8
+    container_name: promtail
+    command: ["--config.file=/etc/promtail.yml"]
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ${PWD}/platform/observability/promtail-config.yml:/etc/promtail.yml:ro
+
+  prometheus:
+    image: prom/prometheus:v2.54.0
+    container_name: prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - prom-data:/prometheus
+      - ${PWD}/platform/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ${PWD}/platform/observability/alert.rules.yml:/etc/prometheus/alert.rules.yml:ro
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    container_name: grafana
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ${PWD}/observability/grafana/provisioning/datasources/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      - ${PWD}/observability/grafana/provisioning/dashboards/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
+      - ${PWD}/observability/grafana/provisioning/dashboards/Observability:/etc/grafana/provisioning/dashboards/Observability:ro
+
+  node-exporter:
+    image: prom/node-exporter:v1.8.1
+    container_name: node-exporter
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    container_name: cadvisor
+
+  # --- Your apps (APIs) ---
+  catalog-api:
+    build:
+      context: ${PWD}/app/catalog-api
+    container_name: catalog-api
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@pg:5432/postgres?sslmode=disable
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+      LOG_LEVEL: info
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >
+          python -c "import urllib.request,sys; r=urllib.request.urlopen('http://localhost:8000/metrics',timeout=3);
+          sys.exit(0 if getattr(r,'status',200)==200 else 1)"
+      interval: 10s
+      timeout: 4s
+      retries: 8
+      start_period: 20s
+
+  orders-api:
+    build:
+      context: ${PWD}/app/orders-api
+    container_name: orders-api
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@pg:5432/postgres?sslmode=disable
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+      LOG_LEVEL: info
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >
+          python -c "import urllib.request,sys; r=urllib.request.urlopen('http://localhost:8000/metrics',timeout=3);
+          sys.exit(0 if getattr(r,'status',200)==200 else 1)"
+      interval: 10s
+      timeout: 4s
+      retries: 8
+      start_period: 20s
+
+  payments-api:
+    build:
+      context: ${PWD}/app/payments-api
+    container_name: payments-api
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@pg:5432/postgres?sslmode=disable
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+      LOG_LEVEL: info
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >
+          python -c "import urllib.request,sys; r=urllib.request.urlopen('http://localhost:8000/metrics',timeout=3);
+          sys.exit(0 if getattr(r,'status',200)==200 else 1)"
+      interval: 10s
+      timeout: 4s
+      retries: 8
+      start_period: 20s
+
+  # --- Worker (heartbeat + /metrics:9102) ---
+  inventory-worker:
+    build:
+      context: ${PWD}/app/inventory-worker
+    container_name: inventory-worker
+    command: ["python","-u","worker.py"]
+    environment:
+      PYTHONUNBUFFERED: "1"
+      LOG_LEVEL: info
+      DATABASE_URL: postgres://postgres:postgres@pg:5432/postgres?sslmode=disable
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+    depends_on:
+      - pg
+      - rabbitmq
+    restart: unless-stopped
+
+  # --- Storefront (Next.js) ---
+  storefront:
+    build:
+      context: ${PWD}/app/storefront
+      args:
+        NEXT_PUBLIC_CATALOG_API_URL:  http://localhost:7001
+        NEXT_PUBLIC_ORDERS_API_URL:   http://localhost:7002
+        NEXT_PUBLIC_PAYMENTS_API_URL: http://localhost:7003
+    container_name: storefront
+    environment:
+      SERVER_CATALOG_API_URL:  http://catalog-api:8000
+      SERVER_ORDERS_API_URL:   http://orders-api:8000
+      SERVER_PAYMENTS_API_URL: http://payments-api:8000
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >
+          node -e "require('http').get('http://localhost:3000/',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"
+      interval: 10s
+      timeout: 4s
+      retries: 8
+      start_period: 20s
+
+volumes:
+  pg-data:
+  prom-data:
+  loki-data:
+  grafana-data:

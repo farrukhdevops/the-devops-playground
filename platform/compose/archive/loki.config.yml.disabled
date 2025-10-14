@@ -1,0 +1,10 @@
+services:
+  loki:
+    command: -config.file=/etc/loki/config.yml
+    volumes:
+      - ../observability/loki/config.yml:/etc/loki/config.yml:ro
+      - loki-data:/loki
+    restart: unless-stopped
+
+volumes:
+  loki-data:

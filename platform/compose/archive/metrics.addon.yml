@@ -1,0 +1,33 @@
+services:
+  node-exporter:
+    image: prom/node-exporter:v1.8.2
+    container_name: node-exporter
+    network_mode: host # exposes metrics on host:9100
+    pid: host
+    restart: unless-stopped
+    command: ['--path.rootfs=/host']
+    volumes:
+      - /:/host:ro,rslave
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    container_name: cadvisor
+    restart: unless-stopped
+    # Scraped internally by Prometheus as 'cadvisor:8080'
+    command:
+      - '--housekeeping_interval=10s'
+      - '--enable_metrics=cpu,memory,disk,network'
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter
+    container_name: postgres-exporter
+    environment:
+      - DATA_SOURCE_NAME=postgresql://catalog_user:catalog_pass@pg:5432/catalog?sslmode=disable
+    depends_on:
+      - pg

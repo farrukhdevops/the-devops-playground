@@ -1,0 +1,64 @@
+{
+  "items": [
+    {
+      "id": "kbd-gmmk2-65",
+      "sku": "KBD-GMMK2-65",
+      "title": "Glorious GMMK 2 (65%) Mechanical Keyboard",
+      "brand": "Glorious",
+      "category": "Keyboards",
+      "price_cents": 12999,
+      "image_url": "/img/keyboards/gmmk2-65.jpg",
+      "short_desc": "Hot-swappable 65% board, pre-lubed stabs, per-key RGB.",
+      "specs": { "switch":"Gateron Brown", "layout":"US 67-key", "connector":"USB-C" },
+      "available": 24
+    },
+    {
+      "id": "mouse-logi-g502x",
+      "sku": "MOU-LOGI-G502X",
+      "title": "Logitech G502 X Lightspeed Wireless Mouse",
+      "brand": "Logitech",
+      "category": "Mice",
+      "price_cents": 14999,
+      "image_url": "/img/mice/g502x.jpg",
+      "short_desc": "Iconic ergonomic shape, HERO 25K sensor, LIGHTSPEED.",
+      "specs": { "sensor":"HERO 25K", "dpi":"25600", "weight":"102g" },
+      "available": 18
+    },
+    {
+      "id": "mon-lg-27gp850",
+      "sku": "MON-LG-27GP850",
+      "title": "LG 27GP850-B 27\" QHD 165Hz IPS",
+      "brand": "LG",
+      "category": "Monitors",
+      "price_cents": 34999,
+      "image_url": "/img/monitors/27gp850.jpg",
+      "short_desc": "Nano IPS, G-SYNC Compatible, HDR10.",
+      "specs": { "panel":"IPS", "refresh":"165Hz", "resolution":"2560x1440" },
+      "available": 12
+    },
+    {
+      "id": "ssd-samsung-990pro-1tb",
+      "sku": "SSD-SAM-990PRO-1TB",
+      "title": "Samsung 990 PRO 1TB NVMe SSD",
+      "brand": "Samsung",
+      "category": "Storage",
+      "price_cents": 12999,
+      "image_url": "/img/storage/990pro-1tb.jpg",
+      "short_desc": "PCIe 4.0 NVMe, up to 7450MB/s read.",
+      "specs": { "form_factor":"M.2 2280", "interface":"PCIe 4.0 x4" },
+      "available": 40
+    },
+    {
+      "id": "ram-corsair-32gb-6000",
+      "sku": "RAM-COR-32G-6000",
+      "title": "Corsair Vengeance 32GB (2x16) DDR5-6000",
+      "brand": "Corsair",
+      "category": "Memory",
+      "price_cents": 11499,
+      "image_url": "/img/ram/vengeance-32gb-6000.jpg",
+      "short_desc": "Low-profile DDR5 kit for modern chipsets.",
+      "specs": { "speed":"6000MT/s", "voltage":"1.35V", "timings":"CL36" },
+      "available": 33
+    }
+  ]
+}

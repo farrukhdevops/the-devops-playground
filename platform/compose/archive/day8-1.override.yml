@@ -1,0 +1,5 @@
+services:
+  storefront:
+    container_name: tdp-storefront
+    ports:
+      - "8080:3000"

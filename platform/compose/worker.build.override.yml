@@ -1,0 +1,11 @@
+services:
+  inventory-worker:
+    build:
+      context: ${PWD}/app/inventory-worker
+    container_name: inventory-worker
+    depends_on:
+      - pg
+      - rabbitmq
+    restart: unless-stopped
+    # If your Dockerfile already sets CMD, leave this commented.
+    # command: ["python", "worker.py"]

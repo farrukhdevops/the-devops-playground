@@ -1,0 +1,22 @@
+services:
+  storefront:
+    environment:
+      # Public (browser) calls hit host ports
+      NEXT_PUBLIC_CATALOG_API_URL:  "http://localhost:7001"
+      NEXT_PUBLIC_ORDERS_API_URL:   "http://localhost:7002"
+      NEXT_PUBLIC_PAYMENTS_API_URL: "http://localhost:7003"
+
+      # Optional: if your Next.js does SSR or server API routes, use internal DNS
+      SERVER_CATALOG_API_URL:  "http://catalog-api:8000"
+      SERVER_ORDERS_API_URL:   "http://orders-api:8000"
+      SERVER_PAYMENTS_API_URL: "http://payments-api:8000"
+
+    # Healthcheck that works in node images (no curl/wget needed)
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - node -e "require('http').get('http://localhost:3000',res=>process.exit(res.statusCode===200?0:1)).on('error',()=>process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s

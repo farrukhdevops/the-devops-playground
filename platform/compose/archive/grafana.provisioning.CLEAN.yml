@@ -1,0 +1,9 @@
+services:
+  grafana:
+    volumes:
+      # bind our clean tree at /etc/grafana/provisioning
+      - ./platform/compose/grafana/provisioning:/etc/grafana/provisioning:ro
+    # optional (re)assert the admin credentials you’ve been using
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: devopsplayground

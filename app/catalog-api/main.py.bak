@@ -1,0 +1,57 @@
+from fastapi import FastAPI, Depends, HTTPException
+from sqlalchemy.orm import Session
+from db import SessionLocal, Base, engine
+# Tables are managed by Alembic migrations now
+from models import Product
+from schemas import ProductCreate, ProductOut
+
+app = FastAPI()
+
+# Instrument BEFORE startup so middleware can be added safely
+from prometheus_fastapi_instrumentator import Instrumentator
+_instrumentator = Instrumentator().instrument(app)
+_instrumentator.expose(app, endpoint="/metrics")
+
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+@app.get("/healthz")
+def healthz():
+    return {"status": "ok"}
+
+@app.get("/products", response_model=list[ProductOut])
+def list_products(db: Session = Depends(get_db)):
+    return db.query(Product).order_by(Product.id.asc()).all()
+
+@app.post("/products", response_model=ProductOut, status_code=201)
+def create_product(payload: ProductCreate, db: Session = Depends(get_db)):
+    exists = db.query(Product).filter(Product.name == payload.name).first()
+    if exists:
+        raise HTTPException(status_code=409, detail="Product already exists")
+    p = Product(name=payload.name, description=payload.description)
+    db.add(p)
+    db.commit()
+    db.refresh(p)
+    return p
+
+@app.get("/products/{pid}", response_model=ProductOut)
+def get_product(pid: int, db: Session = Depends(get_db)):
+    p = db.get(Product, pid)
+    if not p:
+        raise HTTPException(status_code=404, detail="Not found")
+    return p
+
+@app.delete("/products/{pid}", status_code=204)
+def delete_product(pid: int, db: Session = Depends(get_db)):
+    p = db.get(Product, pid)
+    if not p:
+        raise HTTPException(status_code=404, detail="Not found")
+    db.delete(p)
+    db.commit()
+    return

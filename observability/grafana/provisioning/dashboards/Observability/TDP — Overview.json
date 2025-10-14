@@ -1,0 +1,40 @@
+{
+  "title": "TDP — Overview",
+  "uid": "tdp-overview",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "10s",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Targets UP (by job)",
+      "gridPos": {"x": 0, "y": 0, "w": 12, "h": 6},
+      "targets": [ { "expr": "sum by(job) (up)", "legendFormat": "{{job}}" } ],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    {
+      "type": "timeseries",
+      "title": "API request rate (catalog/orders/payments)",
+      "gridPos": {"x": 12, "y": 0, "w": 12, "h": 6},
+      "targets": [
+        { "expr": "sum by (job) (rate(http_requests_total{job=~\"catalog-api|orders-api|payments-api\"}[2m]))",
+          "legendFormat": "{{job}}" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "API latency p95 (s)",
+      "gridPos": {"x": 0, "y": 6, "w": 12, "h": 6},
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum by (le, job) (rate(http_request_duration_seconds_bucket{job=~\"catalog-api|orders-api|payments-api\"}[2m])))",
+          "legendFormat": "{{job}}" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Inventory worker heartbeats",
+      "gridPos": {"x": 12, "y": 6, "w": 12, "h": 6},
+      "targets": [ { "expr": "rate(inventory_worker_heartbeats_total[2m])", "legendFormat": "worker" } ]
+    }
+  ]
+}

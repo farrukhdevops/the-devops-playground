@@ -1,0 +1,3 @@
+services:
+  grafana:
+    read_only: false

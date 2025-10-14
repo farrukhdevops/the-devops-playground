@@ -1,0 +1,16 @@
+services:
+  grafana:    { ports: ["3000:3000"] }
+  prometheus: { ports: ["9090:9090"] }
+  loki:       { ports: ["3100:3100"] }
+  catalog-api:  { ports: ["7001:7001"] }
+  orders-api:   { ports: ["7002:7002"] }
+  payments-api: { ports: ["7003:7003"] }
+  tdp-frontend: { ports: ["8080:80"] }
+services:
+  grafana:      { ports: ["3000:3000"] }
+  prometheus:   { ports: ["9090:9090"] }
+  loki:         { ports: ["3100:3100"] }
+  catalog-api:  { ports: ["7001:7001"] }
+  orders-api:   { ports: ["7002:7002"] }
+  payments-api: { ports: ["7003:7003"] }
+  tdp-frontend: { ports: ["8080:80"] }

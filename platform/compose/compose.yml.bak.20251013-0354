@@ -1,0 +1,174 @@
+services:
+  # --- Core data plane ---
+  pg:
+    image: postgres:16
+    container_name: pg
+    environment:
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -h localhost"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    healthcheck:
+      test: ["CMD-SHELL","rabbitmq-diagnostics -q ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:2.9.8
+    container_name: loki
+    command: -config.file=/etc/loki/config.yml
+    volumes:
+      - loki-data:/loki
+      - ../observability/loki/config.yml:/etc/loki/config.yml:ro
+    restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail:2.9.8
+    container_name: promtail
+    command: -config.file=/etc/promtail/config.yml
+    volumes:
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ./promtail-config.yml:/etc/promtail/config.yml:ro
+    depends_on:
+      loki: { condition: service_started }
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+    volumes:
+      - ../observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./alert.rules.yml:/etc/prometheus/alert.rules.yml
+      - prom-data:/prometheus
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    container_name: grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: devopsplayground
+      GF_METRICS_ENABLED: "true"
+      GF_PATHS_PROVISIONING: /etc/grafana/provisioning
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      prometheus: { condition: service_started }
+      loki:       { condition: service_started }
+    restart: unless-stopped
+
+  # --- Host metrics ---
+  node-exporter:
+    image: prom/node-exporter:v1.8.2
+    container_name: node-exporter
+    pid: host
+    restart: unless-stopped
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    container_name: cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    restart: unless-stopped
+
+  # --- Your apps (backend + frontend) ---
+  catalog-api:
+    build: { context: ./app/catalog-api }
+    container_name: catalog-api
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@pg:5432/postgres?sslmode=disable
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+      LOG_LEVEL: info
+    depends_on:
+      pg: { condition: service_started }
+      rabbitmq: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:7001/health || exit 1"]
+      interval: 10s
+      timeout: 2s
+      retries: 10
+    restart: unless-stopped
+
+  orders-api:
+    build: { context: ./app/orders-api }
+    container_name: orders-api
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@pg:5432/postgres?sslmode=disable
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+      LOG_LEVEL: info
+    depends_on:
+      pg: { condition: service_started }
+      rabbitmq: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:7002/health || exit 1"]
+      interval: 10s
+      timeout: 2s
+      retries: 10
+    restart: unless-stopped
+
+  payments-api:
+    build: { context: ./app/payments-api }
+    container_name: payments-api
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@pg:5432/postgres?sslmode=disable
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+      LOG_LEVEL: info
+    depends_on:
+      pg: { condition: service_started }
+      rabbitmq: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:7003/health || exit 1"]
+      interval: 10s
+      timeout: 2s
+      retries: 10
+    restart: unless-stopped
+
+  inventory-worker:
+    build: { context: ./app/inventory-worker }
+    container_name: inventory-worker
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@pg:5432/postgres?sslmode=disable
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+      LOG_LEVEL: info
+    depends_on:
+      pg: { condition: service_started }
+      rabbitmq: { condition: service_healthy }
+    restart: unless-stopped
+
+  tdp-frontend:
+    build: { context: ./app/frontend }
+    container_name: tdp-frontend
+    environment:
+      VITE_CATALOG_API_URL:  http://localhost:7001
+      VITE_ORDERS_API_URL:   http://localhost:7002
+      VITE_PAYMENTS_API_URL: http://localhost:7003
+    depends_on:
+      catalog-api:  { condition: service_healthy }
+      orders-api:   { condition: service_healthy }
+      payments-api: { condition: service_healthy }
+    restart: unless-stopped
+
+volumes:
+  pg-data:
+  prom-data:
+  loki-data:
+  grafana-data:

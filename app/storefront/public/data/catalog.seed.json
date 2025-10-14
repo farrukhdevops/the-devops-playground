@@ -1,0 +1,351 @@
+[
+  {
+    "id": 1,
+    "sku": "KB-LOGI-G915",
+    "title": "Logitech G915 TKL",
+    "brand": "Logitech",
+    "category": "keyboard",
+    "price_cents": 24900,
+    "image_url": "/products/keyboard.svg",
+    "short_desc": "Low profile wireless mechanical keyboard",
+    "specs": {
+      "switch": "GL Tactile",
+      "layout": "TKL",
+      "wireless": "Lightspeed"
+    },
+    "available": true
+  },
+  {
+    "id": 2,
+    "sku": "KB-HYPX-ALLOY",
+    "title": "HyperX Alloy Origins",
+    "brand": "HyperX",
+    "category": "keyboard",
+    "price_cents": 11900,
+    "image_url": "/products/keyboard.svg",
+    "short_desc": "Full size aluminum body",
+    "specs": {
+      "switch": "HyperX Red",
+      "layout": "Full",
+      "rgb": true
+    },
+    "available": true
+  },
+  {
+    "id": 3,
+    "sku": "KB-KEYC-K8PRO",
+    "title": "Keychron K8 Pro",
+    "brand": "Keychron",
+    "category": "keyboard",
+    "price_cents": 10900,
+    "image_url": "/products/keyboard.svg",
+    "short_desc": "Hot-swappable TKL",
+    "specs": {
+      "switch": "Gateron",
+      "wireless": "BT"
+    },
+    "available": true
+  },
+  {
+    "id": 4,
+    "sku": "KB-LEO-FC660M",
+    "title": "Leopold FC660M",
+    "brand": "Leopold",
+    "category": "keyboard",
+    "price_cents": 15900,
+    "image_url": "/products/keyboard.svg",
+    "short_desc": "Compact 66-key layout",
+    "specs": {
+      "switch": "Cherry MX"
+    },
+    "available": true
+  },
+  {
+    "id": 5,
+    "sku": "MS-LOGI-MX3S",
+    "title": "Logitech MX Master 3S",
+    "brand": "Logitech",
+    "category": "mouse",
+    "price_cents": 12900,
+    "image_url": "/products/mouse.svg",
+    "short_desc": "Productivity wireless mouse",
+    "specs": {
+      "dpi": "8K",
+      "connectivity": "BT/USB"
+    },
+    "available": true
+  },
+  {
+    "id": 6,
+    "sku": "MS-RAZR-DEATH",
+    "title": "Razer DeathAdder V3",
+    "brand": "Razer",
+    "category": "mouse",
+    "price_cents": 14900,
+    "image_url": "/products/mouse.svg",
+    "short_desc": "Ergonomic esports mouse",
+    "specs": {
+      "sensor": "Focus Pro 30K",
+      "weight": "59g"
+    },
+    "available": true
+  },
+  {
+    "id": 7,
+    "sku": "MS-STEEL-RIVAL3",
+    "title": "SteelSeries Rival 3",
+    "brand": "SteelSeries",
+    "category": "mouse",
+    "price_cents": 3990,
+    "image_url": "/products/mouse.svg",
+    "short_desc": "Lightweight wired",
+    "specs": {
+      "dpi": "8500"
+    },
+    "available": true
+  },
+  {
+    "id": 8,
+    "sku": "MS-ZOWIE-EC2",
+    "title": "BenQ Zowie EC2-C",
+    "brand": "Zowie",
+    "category": "mouse",
+    "price_cents": 6990,
+    "image_url": "/products/mouse.svg",
+    "short_desc": "Esports classic",
+    "specs": {
+      "weight": "73g"
+    },
+    "available": true
+  },
+  {
+    "id": 9,
+    "sku": "MN-LG-27GP850",
+    "title": "LG 27GP850-B 27in 165Hz",
+    "brand": "LG",
+    "category": "monitor",
+    "price_cents": 34900,
+    "image_url": "/products/monitor.svg",
+    "short_desc": "27\" QHD IPS 165 Hz",
+    "specs": {
+      "size": "27",
+      "res": "2560x1440"
+    },
+    "available": true
+  },
+  {
+    "id": 10,
+    "sku": "MN-DELL-S2721DGF",
+    "title": "Dell S2721DGF 27in 165Hz",
+    "brand": "Dell",
+    "category": "monitor",
+    "price_cents": 32900,
+    "image_url": "/products/monitor.svg",
+    "short_desc": "Fast IPS QHD gaming",
+    "specs": {
+      "hdr": "HDR400",
+      "sync": "G-Sync Compatible"
+    },
+    "available": true
+  },
+  {
+    "id": 11,
+    "sku": "MN-ASUS-VG27AQ",
+    "title": "ASUS TUF VG27AQ",
+    "brand": "ASUS",
+    "category": "monitor",
+    "price_cents": 31900,
+    "image_url": "/products/monitor.svg",
+    "short_desc": "QHD IPS ELMB Sync",
+    "specs": {
+      "hz": "165"
+    },
+    "available": true
+  },
+  {
+    "id": 12,
+    "sku": "MN-SAM-ODYSSEY-G7",
+    "title": "Samsung Odyssey G7 32in",
+    "brand": "Samsung",
+    "category": "monitor",
+    "price_cents": 49900,
+    "image_url": "/products/monitor.svg",
+    "short_desc": "Curved VA 240Hz",
+    "specs": {
+      "res": "2560x1440",
+      "hz": "240"
+    },
+    "available": true
+  },
+  {
+    "id": 13,
+    "sku": "SSD-SAM-990PRO-1T",
+    "title": "Samsung 990 Pro 1TB",
+    "brand": "Samsung",
+    "category": "ssd",
+    "price_cents": 12900,
+    "image_url": "/products/ssd.svg",
+    "short_desc": "PCIe 4.0 NVMe SSD",
+    "specs": {
+      "seq_read": "7450MB/s",
+      "seq_write": "6900MB/s"
+    },
+    "available": true
+  },
+  {
+    "id": 14,
+    "sku": "SSD-CRU-P5PLUS-2T",
+    "title": "Crucial P5 Plus 2TB",
+    "brand": "Crucial",
+    "category": "ssd",
+    "price_cents": 15900,
+    "image_url": "/products/ssd.svg",
+    "short_desc": "Solid PCIe 4.0 value",
+    "specs": {
+      "seq_read": "6600MB/s"
+    },
+    "available": true
+  },
+  {
+    "id": 15,
+    "sku": "SSD-WD-SN850X-1T",
+    "title": "WD Black SN850X 1TB",
+    "brand": "WD",
+    "category": "ssd",
+    "price_cents": 11900,
+    "image_url": "/products/ssd.svg",
+    "short_desc": "PCIe 4.0 NVMe",
+    "specs": {
+      "seq_read": "7300MB/s"
+    },
+    "available": true
+  },
+  {
+    "id": 16,
+    "sku": "SSD-KING-FURY-2T",
+    "title": "Kingston Fury Renegade 2TB",
+    "brand": "Kingston",
+    "category": "ssd",
+    "price_cents": 19900,
+    "image_url": "/products/ssd.svg",
+    "short_desc": "Heatsink PCIe 4.0",
+    "specs": {
+      "seq_read": "7300MB/s"
+    },
+    "available": true
+  },
+  {
+    "id": 17,
+    "sku": "RAM-COR-VEN-32",
+    "title": "Corsair Vengeance 32GB DDR4-3600",
+    "brand": "Corsair",
+    "category": "ram",
+    "price_cents": 8900,
+    "image_url": "/products/ram.svg",
+    "short_desc": "2x16GB DDR4 3600",
+    "specs": {
+      "cl": "18",
+      "voltage": "1.35V"
+    },
+    "available": true
+  },
+  {
+    "id": 18,
+    "sku": "RAM-GSK-RIP-32",
+    "title": "G.Skill Ripjaws 32GB DDR5-6000",
+    "brand": "G.Skill",
+    "category": "ram",
+    "price_cents": 11900,
+    "image_url": "/products/ram.svg",
+    "short_desc": "2x16GB DDR5 6000",
+    "specs": {
+      "cl": "36"
+    },
+    "available": true
+  },
+  {
+    "id": 19,
+    "sku": "RAM-KING-FURY-64",
+    "title": "Kingston Fury 64GB DDR5-5600",
+    "brand": "Kingston",
+    "category": "ram",
+    "price_cents": 21900,
+    "image_url": "/products/ram.svg",
+    "short_desc": "2x32GB DDR5 5600",
+    "specs": {
+      "cl": "36"
+    },
+    "available": true
+  },
+  {
+    "id": 20,
+    "sku": "RAM-TEAM-DELTA-32",
+    "title": "TEAMGROUP T-Force Delta 32GB DDR5-6000",
+    "brand": "TEAMGROUP",
+    "category": "ram",
+    "price_cents": 10500,
+    "image_url": "/products/ram.svg",
+    "short_desc": "ARGB heatspreader",
+    "specs": {
+      "cl": "30"
+    },
+    "available": true
+  },
+  {
+    "id": 21,
+    "sku": "GPU-NVI-4070",
+    "title": "NVIDIA GeForce RTX 4070",
+    "brand": "NVIDIA",
+    "category": "gpu",
+    "price_cents": 54900,
+    "image_url": "/products/gpu.svg",
+    "short_desc": "Ada Lovelace 12GB",
+    "specs": {
+      "vram": "12GB",
+      "dlss": "3"
+    },
+    "available": true
+  },
+  {
+    "id": 22,
+    "sku": "GPU-NVI-4070S",
+    "title": "NVIDIA GeForce RTX 4070 SUPER",
+    "brand": "NVIDIA",
+    "category": "gpu",
+    "price_cents": 59900,
+    "image_url": "/products/gpu.svg",
+    "short_desc": "Ada refresh",
+    "specs": {
+      "vram": "12GB"
+    },
+    "available": true
+  },
+  {
+    "id": 23,
+    "sku": "GPU-AMD-7800XT",
+    "title": "AMD Radeon RX 7800 XT",
+    "brand": "AMD",
+    "category": "gpu",
+    "price_cents": 49900,
+    "image_url": "/products/gpu.svg",
+    "short_desc": "RDNA 3 16GB",
+    "specs": {
+      "vram": "16GB"
+    },
+    "available": true
+  },
+  {
+    "id": 24,
+    "sku": "GPU-AMD-7700XT",
+    "title": "AMD Radeon RX 7700 XT",
+    "brand": "AMD",
+    "category": "gpu",
+    "price_cents": 41900,
+    "image_url": "/products/gpu.svg",
+    "short_desc": "RDNA 3 12GB",
+    "specs": {
+      "vram": "12GB"
+    },
+    "available": true
+  }
+]

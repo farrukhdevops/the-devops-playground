@@ -1,0 +1,39 @@
+services:
+  catalog-api:
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >
+          python -c "import sys,urllib.request;
+          r=urllib.request.urlopen('http://localhost:8000/metrics', timeout=3);
+          sys.exit(0 if getattr(r,'status',200)==200 else 1)"
+      interval: 10s
+      timeout: 4s
+      retries: 8
+      start_period: 20s
+
+  orders-api:
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >
+          python -c "import sys,urllib.request;
+          r=urllib.request.urlopen('http://localhost:8000/metrics', timeout=3);
+          sys.exit(0 if getattr(r,'status',200)==200 else 1)"
+      interval: 10s
+      timeout: 4s
+      retries: 8
+      start_period: 20s
+
+  payments-api:
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >
+          python -c "import sys,urllib.request;
+          r=urllib.request.urlopen('http://localhost:8000/metrics', timeout=3);
+          sys.exit(0 if getattr(r,'status',200)==200 else 1)"
+      interval: 10s
+      timeout: 4s
+      retries: 8
+      start_period: 20s

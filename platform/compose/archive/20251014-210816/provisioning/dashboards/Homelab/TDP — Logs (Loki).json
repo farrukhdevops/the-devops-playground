@@ -1,0 +1,1 @@
+{"title":"TDP - Logs (Loki)","tags":["tdp","logs"],"panels":[{"type":"logs","title":"Recent logs","datasource":"Loki","targets":[{"expr":"{job=\"docker-logs\"}"}]}],"schemaVersion":39,"version":1}

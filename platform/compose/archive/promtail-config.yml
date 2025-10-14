@@ -1,0 +1,60 @@
+server:
+  http_listen_port: 9080
+  log_level: info
+
+positions:
+  filename: /run/promtail/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: docker
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 10s
+
+    # Parse Docker JSON log format (optional but recommended)
+    pipeline_stages:
+      - docker: {}
+
+    relabel_configs:
+      # 0) Unconditionally ensure at least one label pair exists on every stream.
+      # We key this rule off the container id so it *always* matches.
+      - action: replace
+        source_labels: [__meta_docker_container_id]
+        regex: .+
+        target_label: job
+        replacement: docker
+
+      # 1) Keep only running containers
+      - source_labels: [__meta_docker_container_state]
+        regex: running
+        action: keep
+
+      # 2) Prefer explicit "loki_job" label (you set this on many services)
+      - source_labels: [__meta_docker_container_label_loki_job]
+        regex: (.+)
+        action: replace
+        target_label: job
+        replacement: $1
+
+      # 3) Else use compose service name
+      - source_labels: [__meta_docker_container_label_com_docker_compose_service]
+        regex: (.+)
+        action: replace
+        target_label: job
+        replacement: $1
+
+      # 4) Else fall back to container name (strip leading '/')
+      - source_labels: [__meta_docker_container_name]
+        regex: ^/(.+)$
+        action: replace
+        target_label: job
+        replacement: $1
+
+      # 5) Helpful context labels
+      - source_labels: [__meta_docker_container_label_com_docker_compose_project]
+        target_label: compose_project
+      - source_labels: [__meta_docker_container_label_com_docker_compose_service]
+        target_label: compose_service

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+project=tdp
+dc="docker compose -p $project"
+$dc -f platform/compose/compose.yml \
+    -f platform/compose/metrics.addon.yml \
+    up -d --build
+echo "→ waiting for Prometheus..."
+until curl -fsS http://localhost:9090/-/ready >/dev/null 2>&1; do sleep 1; done
+echo "OK"

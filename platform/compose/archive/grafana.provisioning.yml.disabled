@@ -1,0 +1,14 @@
+services:
+  grafana:
+    volumes:
+      - type: volume
+        source: grafana-data
+        target: /var/lib/grafana
+      - type: bind
+        source: ./platform/compose/grafana/provisioning
+        target: /etc/grafana/provisioning
+        read_only: true
+
+volumes:
+  grafana-data:
+    name: grafana-data

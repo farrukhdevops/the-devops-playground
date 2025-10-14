@@ -1,0 +1,17 @@
+{
+  "title": "TDP — Logs (Loki)",
+  "uid": "tdp-logs",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "10s",
+  "panels": [
+    { "type": "stat", "title": "Worker heartbeat lines/min",
+      "gridPos": {"x":0,"y":0,"w":12,"h":6},
+      "targets": [ { "datasource": "Loki",
+                     "expr": "sum(rate({job=\"docker\"} |= \"inventory-worker heartbeat\" [2m]))",
+                     "legendFormat": "heartbeats" } ] },
+    { "type": "logs", "title": "Recent docker logs",
+      "gridPos": {"x":0,"y":6,"w":24,"h":10},
+      "targets": [ { "datasource": "Loki", "expr": "{job=\"docker\"}" } ] }
+  ]
+}

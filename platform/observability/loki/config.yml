@@ -1,0 +1,42 @@
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+  grpc_listen_port: 0
+
+common:
+  path_prefix: /loki
+  ring:
+    kvstore:
+      store: inmemory
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
+
+schema_config:
+  configs:
+    - from: 2024-01-01
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+ingester:
+  lifecycler:
+    ring:
+      replication_factor: 1
+
+limits_config:
+  ingestion_rate_strategy: local
+  reject_old_samples: true
+  reject_old_samples_max_age: 168h
+
+ruler:
+  storage:
+    type: local
+    local:
+      directory: /loki/rules
+  alertmanager_url: http://localhost:9093

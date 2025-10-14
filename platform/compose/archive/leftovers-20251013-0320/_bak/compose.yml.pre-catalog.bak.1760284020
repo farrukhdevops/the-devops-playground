@@ -1,0 +1,202 @@
+services:
+  promtail:
+    image: grafana/promtail:2.9.8
+    container_name: promtail
+    restart: unless-stopped
+    depends_on:
+      - loki
+    command:
+      - -config.file=/etc/promtail/config.yml
+      - -server.http-listen-port=9080
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/log:/var/log:ro
+      - ../compose/promtail-config.yml:/etc/promtail/config.yml:ro
+      - promtail-positions:/run/promtail
+#   postgres:
+#     image: postgres:16
+#     container_name: pg
+#     environment:
+#       POSTGRES_DB: catalog
+#       POSTGRES_USER: catalog_user
+#       POSTGRES_PASSWORD: catalog_pass
+#     ports:
+#       - 5432:5432
+#     volumes:
+#       - pgdata:/var/lib/postgresql/data
+#   rabbitmq:
+#     image: rabbitmq:3-management
+#     container_name: rabbitmq
+#     env_file:
+#       - .env.local
+#     ports:
+#       - 5672:5672
+#       - 15672:15672
+#       - 15692:15692
+#     healthcheck:
+#       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+#       interval: 5s
+#       timeout: 3s
+#       retries: 15
+#     labels:
+#       logging: promtail
+#       loki_job: rabbitmq
+#     command: bash -lc "rabbitmq-plugins enable --offline rabbitmq_prometheus && docker-entrypoint.sh rabbitmq-server"
+#   catalog-api:
+#     build:
+#       context: ../../apps/catalog-api
+#     container_name: catalog-api
+#     ports:
+#       - 8000:8000
+#     env_file:
+#       - ../../apps/catalog-api/.env
+#       - .env.local
+#     depends_on:
+#       - postgres
+#       - rabbitmq
+#     labels:
+#       logging: promtail
+#       loki_job: catalog-api
+#     command:
+#       - uvicorn
+#       - main:app
+#       - --host
+#       - 0.0.0.0
+#       - --port
+#       - "8000"
+#   inventory-worker:
+#     build:
+#       context: ../../apps/inventory-worker
+#     container_name: inventory-worker
+#     env_file:
+#       - .env.local
+#     depends_on:
+#       - rabbitmq
+#     environment:
+#       PYTHONUNBUFFERED: '1'
+#     command: python -u worker.py
+#     labels:
+#       logging: promtail
+#       loki_job: inventory-worker
+#   loki:
+#     image: grafana/loki:2.9.8
+#     command:
+#       - -config.file=/etc/loki/local-config.yaml
+#     ports:
+#       - 3100:3100
+#     volumes:
+#       - loki-data:/loki
+#   prometheus:
+#     image: prom/prometheus:v2.54.1
+#     container_name: prometheus
+#     ports:
+#       - 9090:9090
+#     volumes:
+#       - ../observability/prometheus.yml:/etc/prometheus/prometheus.yml
+#     command:
+#       - --config.file=/etc/prometheus/prometheus.yml
+#     depends_on:
+#       - catalog-api
+#       - loki
+#     extra_hosts:
+#       - host.docker.internal:host-gateway
+#   grafana:
+#     image: grafana/grafana:11.2.0
+#     container_name: grafana
+#     ports:
+#       - 3000:3000
+#     environment:
+#       GF_SECURITY_ADMIN_USER: admin
+#       GF_SECURITY_ADMIN_PASSWORD: admin
+#       GF_METRICS_ENABLED: "true"
+#       GF_METRICS_BASIC_AUTH_USERNAME: admin
+#       GF_METRICS_BASIC_AUTH_PASSWORD: admin
+#     volumes:
+#       - grafana-data:/var/lib/grafana
+#       - ./observability/grafana-provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+#     depends_on:
+#       - prometheus
+#       - loki
+#   frontend:
+#     build:
+#       context: ../../apps/frontend
+#       dockerfile: Dockerfile
+#     image: tdp-frontend:latest
+#     container_name: tdp-frontend
+#     ports:
+#       - "8080:80"
+#     labels:
+#       logging: "promtail"
+#       loki_job: "frontend"
+#     restart: unless-stopped
+#   portainer:
+#     image: portainer/portainer-ce:latest
+#     container_name: portainer
+#     ports:
+#       - 127.0.0.1:9443:9443
+#     volumes:
+#       - /var/run/docker.sock:/var/run/docker.sock
+#       - portainer_data:/data
+#     restart: always
+#     command:
+#       - --admin-password-file
+#       - /run/secrets/portainer_admin
+#     secrets:
+#       - portainer_admin
+#   orders-api:
+#     build: ../../apps/orders-api
+#     container_name: orders-api
+#     depends_on:
+#       - postgres
+#       - rabbitmq
+#     env_file:
+#       - .env.local
+#     environment:
+#       - DATABASE_URL=${DATABASE_URL}
+#       - RABBITMQ_URL=${RABBITMQ_URL}
+#     ports:
+#       - 8001:8000
+#     labels:
+#       logging: promtail
+#       loki_job: orders-api
+#   payments-api:
+#     build: ../../apps/payments-api
+#     container_name: payments-api
+#     depends_on:
+#       - postgres
+#       - rabbitmq
+#     env_file:
+#       - .env.local
+#     environment:
+#       - DATABASE_URL=${DATABASE_URL}
+#       - RABBITMQ_URL=${RABBITMQ_URL}
+#     ports:
+#       - 8002:8000
+#     labels:
+#       logging: promtail
+#       loki_job: payments-api
+#   ai-worker:
+#     build: ../../apps/ai-worker
+#     container_name: ai-worker
+#     depends_on:
+#       - postgres
+#       - rabbitmq
+#     env_file:
+#       - .env.local
+#     environment:
+#       - DATABASE_URL=${DATABASE_URL}
+#       - RABBITMQ_URL=${RABBITMQ_URL}
+#     labels:
+#       logging: promtail
+#       loki_job: ai-worker
+volumes:
+  pgdata: {}
+  loki-data: {}
+  prometheus-data: {}
+  grafana-data: {}
+  portainer_data: {}
+  promtail-positions: {}
+secrets:
+  portainer_admin:
+    file: ./portainer_admin.txt

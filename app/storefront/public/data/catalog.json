@@ -1,0 +1,35 @@
+[
+  {
+    "id": "kb-annepro2",
+    "sku": "KB-ANNEPRO2-WHT",
+    "title": "Anne Pro 2 Mechanical Keyboard",
+    "brand": "Obinslab",
+    "category": "Keyboards",
+    "price_cents": 8999,
+    "image_url": "/images/annepro2.jpg",
+    "short_desc": "60% wireless mechanical keyboard, Gateron Brown",
+    "specs": { "layout": "60%", "switch": "Brown", "connectivity": "BT/USB-C" }
+  },
+  {
+    "id": "ms-xm700",
+    "sku": "MS-XM700-BLK",
+    "title": "XM700 Wireless Mouse",
+    "brand": "Endgame Gear",
+    "category": "Mice",
+    "price_cents": 5999,
+    "image_url": "/images/xm700.jpg",
+    "short_desc": "Lightweight 58g, 1000Hz polling",
+    "specs": { "sensor": "PAW3395", "weight": "58g", "polling": "1kHz" }
+  },
+  {
+    "id": "mn-27q144",
+    "sku": "MN-27Q144-IPS",
+    "title": "27\" QHD 144Hz IPS Monitor",
+    "brand": "Acer",
+    "category": "Monitors",
+    "price_cents": 22999,
+    "image_url": "/images/27q144.jpg",
+    "short_desc": "2560×1440, 144Hz, IPS",
+    "specs": { "panel": "IPS", "refresh": "144Hz", "size": "27\"" }
+  }
+]
