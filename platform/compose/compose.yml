@@ -1,11 +1,10 @@
-version: "3.9"
 name: tdp
 
 services:
   postgres:
     image: postgres:15-alpine
     container_name: postgres
-    env_file: [ ./platform/compose/.env ]
+    env_file: [ .env ]
     environment:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
@@ -39,7 +38,7 @@ services:
       - loki-data:/loki
       - ./platform/observability/loki/config.yml:/etc/loki/config.yml:ro
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3100/ready"\]
+      test: ["CMD", "wget", "-qO-", "http://localhost:3100/ready"]
       interval: 10s
       timeout: 3s
       retries: 10
@@ -61,7 +60,7 @@ services:
       - prom-data:/prometheus
       - ./platform/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:9090/-/ready"\]
+      test: ["CMD", "wget", "-qO-", "http://localhost:9090/-/ready"]
       interval: 10s
       timeout: 3s
       retries: 10
@@ -91,7 +90,7 @@ services:
   catalog-api:
     build: { context: ./app/catalog-api }
     container_name: catalog-api
-    env_file: [ ./platform/compose/.env ]
+    env_file: [ .env ]
     environment:
       - DATABASE_URL=postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/$(POSTGRES_DB)
       - RABBITMQ_URL=amqp://$(RABBITMQ_DEFAULT_USER):$(RABBITMQ_DEFAULT_PASS)@rabbitmq:5672/
@@ -100,19 +99,19 @@ services:
   orders-api:
     build: { context: ./app/orders-api }
     container_name: orders-api
-    env_file: [ ./platform/compose/.env ]
+    env_file: [ .env ]
     depends_on: [ postgres, rabbitmq ]
 
   payments-api:
     build: { context: ./app/payments-api }
     container_name: payments-api
-    env_file: [ ./platform/compose/.env ]
+    env_file: [ .env ]
     depends_on: [ postgres, rabbitmq ]
 
   inventory-worker:
     build: { context: ./app/inventory-worker }
     container_name: inventory-worker
-    env_file: [ ./platform/compose/.env ]
+    env_file: [ .env ]
     depends_on: [ postgres, rabbitmq ]
 
   storefront:
