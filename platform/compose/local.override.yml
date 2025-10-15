@@ -1,8 +1,25 @@
+
 services:
-  storefront:   { ports: ["3000:3000"] }
-  prometheus:   { ports: ["9090:9090"] }
-  loki:         { ports: ["3100:3100"] }
-  grafana:      { ports: ["3001:3000"] }
-  catalog-api:  { ports: ["7001:8000"] }
-  orders-api:   { ports: ["7002:8000"] }
-  payments-api: { ports: ["7003:8000"] }
+  prometheus:
+    ports: ["9090:9090"]
+
+  loki:
+    ports: ["3100:3100"]
+
+  grafana:
+    ports: ["3001:3000"]
+
+  storefront:
+    ports: ["3000:3000"]
+
+  catalog-api:
+    ports: ["7001:8000"]
+
+  orders-api:
+    ports: ["7002:8000"]
+
+  payments-api:
+    ports: ["7003:8000"]
+
+  portainer:
+    ports: ["9000:9000"]

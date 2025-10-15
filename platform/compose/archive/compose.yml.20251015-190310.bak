@@ -1,0 +1,138 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres
+    env_file: [ .env ]
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER
+      - RABBITMQ_DEFAULT_PASS
+    # (mgmt port exposure is handled in overrides if needed)
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  loki:
+    image: grafana/loki:2.9.4
+    container_name: loki
+    command: ["-config.file=/etc/loki/config.yml"]
+    volumes:
+      - loki-data:/loki
+      - .../observability/loki/config.yml:/etc/loki/config.yml:ro
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3100/ready"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  promtail:
+    image: grafana/promtail:2.9.4
+    container_name: promtail
+    command: ["-config.file=/etc/promtail.yml"]
+    volumes:
+      - .../observability/promtail/config.yml:/etc/promtail.yml:ro
+      - /var/log:/var/log:ro
+    depends_on: [ loki ]
+
+  prometheus:
+    image: prom/prometheus:v2.53.1
+    container_name: prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=15d"
+      - "--web.enable-lifecycle"
+    volumes:
+      - prom-data:/prometheus
+      - .../observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9090/-/ready"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    container_name: grafana
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    volumes:
+      - grafana-data:/var/lib/grafana
+      # note: these provisioning paths intentionally use ./observability (not ./platform/observability),
+      # because your repo has grafana provisioning there.
+      - ../observability/grafana/provisioning/datasources/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      - ../observability/grafana/provisioning/dashboards/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
+      - ../observability/grafana/provisioning/dashboards/Observability:/var/lib/grafana/dashboards/Observability:ro
+    depends_on: [ prometheus, loki ]
+
+  node-exporter:
+    image: prom/node-exporter:v1.8.1
+    container_name: node-exporter
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    container_name: cadvisor
+    privileged: true
+
+  catalog-api:
+    build: { context: ./app/catalog-api }
+    container_name: catalog-api
+    env_file: [ .env ]
+    environment:
+      - DATABASE_URL=postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/$(POSTGRES_DB)
+      - RABBITMQ_URL=amqp://$(RABBITMQ_DEFAULT_USER):$(RABBITMQ_DEFAULT_PASS)@rabbitmq:5672/
+    depends_on: [ postgres, rabbitmq ]
+
+  orders-api:
+    build: { context: ./app/orders-api }
+    container_name: orders-api
+    env_file: [ .env ]
+    depends_on: [ postgres, rabbitmq ]
+
+  payments-api:
+    build: { context: ./app/payments-api }
+    container_name: payments-api
+    env_file: [ .env ]
+    depends_on: [ postgres, rabbitmq ]
+
+  inventory-worker:
+    build: { context: ./app/inventory-worker }
+    container_name: inventory-worker
+    env_file: [ .env ]
+    depends_on: [ postgres, rabbitmq ]
+
+  storefront:
+    build: { context: ./app/storefront }
+    container_name: storefront
+    depends_on: [ catalog-api, orders-api, payments-api ]
+
+  portainer:
+    image: portainer/portainer-ce:2.21.4
+    container_name: portainer
+    volumes:
+      - portainer-data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  pg-data:
+  prom-data:
+  loki-data:
+  grafana-data:
+  portainer-data:
+

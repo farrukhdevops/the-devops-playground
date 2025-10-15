@@ -1,11 +1,11 @@
 groups:
-  - name: playground
+  - name: basic
     rules:
-      - alert: PlaygroundAlive
-        expr: up == 1
-        for: 0m
+      - alert: InstanceDown
+        expr: up == 0
+        for: 2m
         labels:
-          severity: info
+          severity: warning
         annotations:
-          summary: "Playground looks alive"
-          description: "At least one target is up."
+          summary: "Instance {{ $labels.instance }} down"
+          description: "Job {{ $labels.job }} on {{ $labels.instance }} has been down for >2m."
