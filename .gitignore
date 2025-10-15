@@ -1,2 +1,4 @@
 platform/compose/.env
 platform/compose/*.secret*
+platform/compose/compose.live.yml
+platform/compose/compose.yml.bak.*
