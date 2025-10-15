@@ -1,82 +1,68 @@
-name: tdp
 
 services:
-  postgres:
-    image: postgres:15-alpine
-    container_name: postgres
-    env_file: [ .env ]
+  pg:
+    image: postgres:16
+    container_name: pg
     environment:
-      - POSTGRES_USER
-      - POSTGRES_PASSWORD
-      - POSTGRES_DB
+      POSTGRES_USER: catalog_user
+      POSTGRES_DB: catalog
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devpassword}
     volumes:
-      - pg-data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 10s
-      timeout: 3s
+      timeout: 5s
       retries: 10
 
   rabbitmq:
-    image: rabbitmq:3-management-alpine
+    image: rabbitmq:3.13-management
     container_name: rabbitmq
-    environment:
-      - RABBITMQ_DEFAULT_USER
-      - RABBITMQ_DEFAULT_PASS
-    ports: [ "15672:15672" ]
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      test: ["CMD", "rabbitmq-diagnostics", "status"]
       interval: 10s
-      timeout: 3s
+      timeout: 5s
       retries: 10
 
   loki:
-    image: grafana/loki:2.9.4
+    image: grafana/loki:2.9.8
     container_name: loki
     command: ["-config.file=/etc/loki/config.yml"]
     volumes:
-      - loki-data:/loki
-      - ./platform/observability/loki/config.yml:/etc/loki/config.yml:ro
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3100/ready"]
-      interval: 10s
-      timeout: 3s
-      retries: 10
+      - ../observability/loki/config.yml:/etc/loki/config.yml:ro
+      - lokidata:/loki
 
   promtail:
-    image: grafana/promtail:2.9.4
+    image: grafana/promtail:2.9.8
     container_name: promtail
     command: ["-config.file=/etc/promtail.yml"]
     volumes:
-      - ./platform/observability/promtail/config.yml:/etc/promtail.yml:ro
+      - ../observability/promtail-config.yml:/etc/promtail.yml:ro
       - /var/log:/var/log:ro
-    depends_on: [ loki ]
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
 
   prometheus:
-    image: prom/prometheus:v2.53.1
+    image: prom/prometheus:v2.54.1
     container_name: prometheus
-    command: ["--config.file=/etc/prometheus/prometheus.yml","--storage.tsdb.retention.time=15d"]
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle"
     volumes:
-      - prom-data:/prometheus
-      - ./platform/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:9090/-/ready"]
-      interval: 10s
-      timeout: 3s
-      retries: 10
+      - ../observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ../observability/alert.rules.yml:/etc/prometheus/alert.rules.yml:ro
+      - promdata:/prometheus
 
   grafana:
     image: grafana/grafana:11.2.0
     container_name: grafana
     environment:
-      - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_AUTH_DISABLE_LOGIN_FORM=true
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: devopsplayground
     volumes:
-      - grafana-data:/var/lib/grafana
-      - ./observability/grafana/provisioning/datasources/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
-      - ./observability/grafana/provisioning/dashboards/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
-      - ./observability/grafana/provisioning/dashboards/Observability:/var/lib/grafana/dashboards/Observability:ro
-    depends_on: [ prometheus, loki ]
+      - ../../observability/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ../../observability/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - grafanadata:/var/lib/grafana
 
   node-exporter:
     image: prom/node-exporter:v1.8.1
@@ -85,50 +71,38 @@ services:
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.49.1
     container_name: cadvisor
-    privileged: true
-
-  catalog-api:
-    build: { context: ./app/catalog-api }
-    container_name: catalog-api
-    env_file: [ .env ]
-    environment:
-      - DATABASE_URL=postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/$(POSTGRES_DB)
-      - RABBITMQ_URL=amqp://$(RABBITMQ_DEFAULT_USER):$(RABBITMQ_DEFAULT_PASS)@rabbitmq:5672/
-    depends_on: [ postgres, rabbitmq ]
-
-  orders-api:
-    build: { context: ./app/orders-api }
-    container_name: orders-api
-    env_file: [ .env ]
-    depends_on: [ postgres, rabbitmq ]
-
-  payments-api:
-    build: { context: ./app/payments-api }
-    container_name: payments-api
-    env_file: [ .env ]
-    depends_on: [ postgres, rabbitmq ]
-
-  inventory-worker:
-    build: { context: ./app/inventory-worker }
-    container_name: inventory-worker
-    env_file: [ .env ]
-    depends_on: [ postgres, rabbitmq ]
 
   storefront:
-    build: { context: ./app/storefront }
-    container_name: storefront
-    depends_on: [ catalog-api, orders-api, payments-api ]
+    image: ghcr.io/farrukhdevops/tdp-storefront:latest
+    container_name: tdp-storefront
+    depends_on: [prometheus, loki, grafana]
+
+  catalog-api:
+    image: ghcr.io/farrukhdevops/catalog-api:latest
+    container_name: catalog-api
+
+  orders-api:
+    image: ghcr.io/farrukhdevops/orders-api:latest
+    container_name: orders-api
+
+  payments-api:
+    image: ghcr.io/farrukhdevops/payments-api:latest
+    container_name: payments-api
+
+  inventory-worker:
+    image: ghcr.io/farrukhdevops/inventory-worker:latest
+    container_name: inventory-worker
 
   portainer:
-    image: portainer/portainer-ce:2.20.3
+    image: portainer/portainer-ce:2.21.4
     container_name: portainer
     volumes:
-      - portainer-data:/data
       - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
 
 volumes:
-  pg-data:
-  prom-data:
-  loki-data:
-  grafana-data:
-  portainer-data:
+  pgdata:
+  promdata:
+  lokidata:
+  grafanadata:
+  portainer_data:
